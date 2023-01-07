@@ -213,12 +213,17 @@ int main(int argc, char const *argv[]) {
     // bool won = false;
     int cardWidth = 240;
     int cardHeight = 336;
+    int cardGap = 30;
     Color cardBack = BLUE;
     Color cardFront = WHITE;
 
     // graphics
     cardGraphics cg;
     cg.cardFaces = {LoadTexture("assets/playing-card-faces.png")};
+    Texture2D bg;
+    bg = {LoadTexture("assets/bg01.png")};
+    Rectangle bgRec{0, 0, 1920, 1080};
+    Vector2 bgPos{0, 0};
 
     // stacks
     int stackIndex[13]{-1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 23};
@@ -325,6 +330,9 @@ int main(int argc, char const *argv[]) {
             newGame = false;
         }
 
+        // fullscreen
+        if (IsKeyPressed(KEY_F)) ToggleFullscreen();
+
         // click on stack
         if (mx >= 1650 && mx <= 1650 + cardWidth && my >= 30 && my <= 30 + cardHeight && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             if (stackIndex[12] >= 0) {
@@ -366,9 +374,9 @@ int main(int argc, char const *argv[]) {
         if (stackIndex[11] >= 0) cardInfoSheet[11][1] = row7[stackIndex[11]];
 
         // top
-        if (isOverFaceUpTop(stackIndex, mx, my, cardWidth, cardHeight, 21) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            int currentStack = topCardSelected(0, stackIndex, cardInfoSheet, mx, my, cardWidth, cardHeight, 21);
-            int currentDeckPos = topCardSelected(1, stackIndex, cardInfoSheet, mx, my, cardWidth, cardHeight, 21);
+        if (isOverFaceUpTop(stackIndex, mx, my, cardWidth, cardHeight, cardGap) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            int currentStack = topCardSelected(0, stackIndex, cardInfoSheet, mx, my, cardWidth, cardHeight, cardGap);
+            int currentDeckPos = topCardSelected(1, stackIndex, cardInfoSheet, mx, my, cardWidth, cardHeight, cardGap);
             int currentSuit = deck.getCardSuit(currentDeckPos);
             int currentValue = deck.getValue(currentDeckPos);
             bool currentIsRed = deck.isRed(currentDeckPos);
@@ -425,7 +433,7 @@ int main(int argc, char const *argv[]) {
                     stackIndex[5]++;
                     row1[stackIndex[5]] = currentDeckPos;
                     deck.setX(currentDeckPos, 30);
-                    deck.setY(currentDeckPos, 396 + stackIndex[5]*21);
+                    deck.setY(currentDeckPos, 396 + stackIndex[5]*cardGap);
                     didCardMove = true;
             }
             if (!didCardMove && currentStack != 7 &&
@@ -436,7 +444,7 @@ int main(int argc, char const *argv[]) {
                     stackIndex[6]++;
                     row2[stackIndex[6]] = currentDeckPos;
                     deck.setX(currentDeckPos, 300);
-                    deck.setY(currentDeckPos, 396 + stackIndex[6]*21);
+                    deck.setY(currentDeckPos, 396 + stackIndex[6]*cardGap);
                     didCardMove = true;
             }
             if (!didCardMove && currentStack != 8 && 
@@ -447,7 +455,7 @@ int main(int argc, char const *argv[]) {
                     stackIndex[7]++;
                     row3[stackIndex[7]] = currentDeckPos;
                     deck.setX(currentDeckPos, 570);
-                    deck.setY(currentDeckPos, 396 + stackIndex[7]*21);
+                    deck.setY(currentDeckPos, 396 + stackIndex[7]*cardGap);
                     didCardMove = true;
             }
             if (!didCardMove && currentStack != 9 && 
@@ -458,7 +466,7 @@ int main(int argc, char const *argv[]) {
                     stackIndex[8]++;
                     row4[stackIndex[8]] = currentDeckPos;
                     deck.setX(currentDeckPos, 840);
-                    deck.setY(currentDeckPos, 396 + stackIndex[8]*21);
+                    deck.setY(currentDeckPos, 396 + stackIndex[8]*cardGap);
                     didCardMove = true;
             }
             if (!didCardMove && currentStack != 10 && 
@@ -469,7 +477,7 @@ int main(int argc, char const *argv[]) {
                     stackIndex[9]++;
                     row5[stackIndex[9]] = currentDeckPos;
                     deck.setX(currentDeckPos, 1110);
-                    deck.setY(currentDeckPos, 396 + stackIndex[9]*21);
+                    deck.setY(currentDeckPos, 396 + stackIndex[9]*cardGap);
                     didCardMove = true;
             }
             if (!didCardMove && currentStack != 11 && 
@@ -480,7 +488,7 @@ int main(int argc, char const *argv[]) {
                     stackIndex[10]++;
                     row6[stackIndex[10]] = currentDeckPos;
                     deck.setX(currentDeckPos, 1380);
-                    deck.setY(currentDeckPos, 396 + stackIndex[10]*21);
+                    deck.setY(currentDeckPos, 396 + stackIndex[10]*cardGap);
                     didCardMove = true;
             }
             if (!didCardMove && currentStack != 12 && 
@@ -491,7 +499,7 @@ int main(int argc, char const *argv[]) {
                     stackIndex[11]++;
                     row7[stackIndex[11]] = currentDeckPos;
                     deck.setX(currentDeckPos, 1650);
-                    deck.setY(currentDeckPos, 396 + stackIndex[11]*21);
+                    deck.setY(currentDeckPos, 396 + stackIndex[11]*cardGap);
                     didCardMove = true;
             }
 
@@ -527,9 +535,9 @@ int main(int argc, char const *argv[]) {
         for (int pos = stackIndex[11]-1; pos >= 0; pos--) if (deck.isFaceUp(row7[pos])) { faceIndex[6][pos][0] = row7[pos]; faceIndex[6][pos][1] = deck.getY(row7[pos]); }
 
         // middle
-        if (isOverFaceUpMiddle(stackIndex, faceIndex, mx, my, cardWidth, 21) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            int currentStack = middleCardSelected(0, stackIndex, faceIndex, mx, my, cardWidth, 21);
-            int currentDeckPos = middleCardSelected(1, stackIndex, faceIndex, mx, my, cardWidth, 21);
+        if (isOverFaceUpMiddle(stackIndex, faceIndex, mx, my, cardWidth, cardGap) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            int currentStack = middleCardSelected(0, stackIndex, faceIndex, mx, my, cardWidth, cardGap);
+            int currentDeckPos = middleCardSelected(1, stackIndex, faceIndex, mx, my, cardWidth, cardGap);
             int currentValue = deck.getValue(currentDeckPos);
             bool currentIsRed = deck.isRed(currentDeckPos);
             bool currentIsBlack = deck.isBlack(currentDeckPos);
@@ -560,7 +568,7 @@ int main(int argc, char const *argv[]) {
                         if (currentStack == 7) row1[stackIndex[5]] = row7[index];
                         
                         deck.setX(row1[stackIndex[5]], 30);
-                        deck.setY(row1[stackIndex[5]], 396 + stackIndex[5]*21);
+                        deck.setY(row1[stackIndex[5]], 396 + stackIndex[5]*cardGap);
                     }
                     didCardMove = true;
             }
@@ -580,7 +588,7 @@ int main(int argc, char const *argv[]) {
                         if (currentStack == 7) row2[stackIndex[6]] = row7[index];
                         
                         deck.setX(row2[stackIndex[6]], 300);
-                        deck.setY(row2[stackIndex[6]], 396 + stackIndex[6]*21);
+                        deck.setY(row2[stackIndex[6]], 396 + stackIndex[6]*cardGap);
                     }
                     didCardMove = true;
             }
@@ -600,7 +608,7 @@ int main(int argc, char const *argv[]) {
                         if (currentStack == 7) row3[stackIndex[7]] = row7[index];
                         
                         deck.setX(row3[stackIndex[7]], 570);
-                        deck.setY(row3[stackIndex[7]], 396 + stackIndex[7]*21);
+                        deck.setY(row3[stackIndex[7]], 396 + stackIndex[7]*cardGap);
                     }
                     didCardMove = true;
             }
@@ -620,7 +628,7 @@ int main(int argc, char const *argv[]) {
                         if (currentStack == 7) row4[stackIndex[8]] = row7[index];
                         
                         deck.setX(row4[stackIndex[8]], 840);
-                        deck.setY(row4[stackIndex[8]], 396 + stackIndex[8]*21);
+                        deck.setY(row4[stackIndex[8]], 396 + stackIndex[8]*cardGap);
                     }
                     didCardMove = true;
             }
@@ -640,7 +648,7 @@ int main(int argc, char const *argv[]) {
                         if (currentStack == 7) row5[stackIndex[9]] = row7[index];
                         
                         deck.setX(row5[stackIndex[9]], 1110);
-                        deck.setY(row5[stackIndex[9]], 396 + stackIndex[9]*21);
+                        deck.setY(row5[stackIndex[9]], 396 + stackIndex[9]*cardGap);
                     }
                     didCardMove = true;
             }
@@ -660,7 +668,7 @@ int main(int argc, char const *argv[]) {
                         if (currentStack == 7) row6[stackIndex[10]] = row7[index];
                         
                         deck.setX(row6[stackIndex[10]], 1380);
-                        deck.setY(row6[stackIndex[10]], 396 + stackIndex[10]*21);
+                        deck.setY(row6[stackIndex[10]], 396 + stackIndex[10]*cardGap);
                     }
                     didCardMove = true;
             }
@@ -680,7 +688,7 @@ int main(int argc, char const *argv[]) {
                         if (currentStack == 1) row7[stackIndex[11]] = row1[index];
                         
                         deck.setX(row7[stackIndex[11]], 1650);
-                        deck.setY(row7[stackIndex[11]], 396 + stackIndex[11]*21);
+                        deck.setY(row7[stackIndex[11]], 396 + stackIndex[11]*cardGap);
                     }
                     didCardMove = true;
             }
@@ -701,6 +709,7 @@ int main(int argc, char const *argv[]) {
 
             BeginDrawing();
             ClearBackground(LIGHTGRAY);
+            DrawTextureRec(bg, bgRec, bgPos, WHITE);
 
             for (int p = 0; p < 5; p++) {
 
