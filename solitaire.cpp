@@ -4,7 +4,7 @@
 class Deck {
     struct card {
         int value = 0;
-        char suit[8];
+        int suit;           // 0 = Clubs, 1 = Spades, 2 = Diamonds, 3 = Hearts
         char name[20]{};
         bool faceUp = false;
         bool isRed = false;
@@ -23,14 +23,17 @@ class Deck {
                 for (auto v: {"ACE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN", "JACK", "QUEEN", "KING"}) {
                     if (cnt < 13) {
                         cards[cnt].value = cnt + 1;
+                        cards[cnt].suit = 0;
                     } else if (cnt < 26) {
                         cards[cnt].value = cnt - 12;
+                        cards[cnt].suit = 1;
                     } else if (cnt < 39) {
                         cards[cnt].value = cnt - 25;
+                        cards[cnt].suit = 2;
                     } else {
                         cards[cnt].value = cnt - 38;
+                        cards[cnt].suit = 3;
                     }
-                    std::sprintf(cards[cnt].suit, "%s", s);
                     std::sprintf(cards[cnt].name, "%s OF %s", v, s);
                     if (cnt < 26) {
                         cards[cnt].isRed = false;
@@ -52,7 +55,7 @@ class Deck {
             return cards[i].value;
         }
 
-        char* getCardSuit(int i) { return cards[i].suit; }
+        int getCardSuit(int i) { return cards[i].suit; }
 
         int getX(int i) { return cards[i].x; }
 
@@ -90,7 +93,7 @@ class Deck {
             cnt = 0;
             for (card c: newOrder) {
                 cards[cnt].value = c.value;
-                std::sprintf(cards[cnt].suit, "%s", c.suit);
+                cards[cnt].suit = c.suit;
                 std::sprintf(cards[cnt].name, "%s", c.name);
                 cards[cnt].faceUp = false;
                 cards[cnt].isRed = c.isRed;
@@ -104,16 +107,38 @@ class Deck {
         }
 };
 
-void drawCard(Deck deck, int index, int cardWidth, int cardHeight, Color cardBack, Color cardFront) {
-    Rectangle rec {(float)deck.getX(index), (float)deck.getY(index), (float)cardWidth, (float)cardHeight};
+struct cardGraphics {
+    cardGraphics(): cardFaces(), cardBacks(), customCardFace(false) { }
+    Texture2D cardFaces;
+    Texture2D cardBacks;
+    bool customCardFace = false;
+};
+
+void drawCard(Deck deck, int index, float cardWidth, float cardHeight, Color cardBack, Color cardFront, bool usingGraphics = false, cardGraphics cg = cardGraphics()) {
+    Rectangle rec {(float)deck.getX(index), (float)deck.getY(index), cardWidth, cardHeight};
     if (!deck.isFaceUp(index)) {
         DrawRectangleRounded(rec, 0.1, 5, cardBack);
     } else {
-        DrawRectangleRounded(rec, 0.1, 5, cardFront);
-        if (deck.isRed(index)) {
-            DrawText(deck.getCardName(index), rec.x + 5, rec.y + 5, 7, RED);
+        if (cg.customCardFace) {
+            // Add code for custom card face.
         } else {
-            DrawText(deck.getCardName(index), rec.x + 5, rec.y + 5, 7, BLACK);
+            DrawRectangleRounded(rec, 0.1, 5, cardFront);
+        }
+        if (!usingGraphics) {
+            Color color;
+            if (deck.isRed(index)) color = RED;
+            else color = BLACK;
+            DrawText(deck.getCardName(index), rec.x + 5, rec.y + 5, 7, color);
+        } else {
+            float x = (deck.getValue(index)-1) * cg.cardFaces.width/13;
+
+            float y = deck.getCardSuit(index);
+            if (cg.customCardFace) y *= cg.cardFaces.height/5;
+            else y *= cg.cardFaces.height/4;
+
+            Rectangle rec{x, y, cardWidth, cardHeight};
+            Vector2 pos{(float)deck.getX(index), (float)deck.getY(index)};
+            DrawTextureRec(cg.cardFaces, rec, pos, WHITE);
         }
     }
     DrawRectangleRoundedLines(rec, 0.1, 5, 0.5, BLACK);
@@ -184,11 +209,16 @@ int main(int argc, char const *argv[]) {
     // game variables
     // float gameTime = 0;
     bool newGame = true;
+    bool useGraphics = true;
     // bool won = false;
     int cardWidth = 240;
     int cardHeight = 336;
     Color cardBack = BLUE;
     Color cardFront = WHITE;
+
+    // graphics
+    cardGraphics cg;
+    cg.cardFaces = {LoadTexture("assets/playing-card-faces.png")};
 
     // stacks
     int stackIndex[13]{-1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 23};
@@ -339,7 +369,7 @@ int main(int argc, char const *argv[]) {
         if (isOverFaceUpTop(stackIndex, mx, my, cardWidth, cardHeight, 21) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             int currentStack = topCardSelected(0, stackIndex, cardInfoSheet, mx, my, cardWidth, cardHeight, 21);
             int currentDeckPos = topCardSelected(1, stackIndex, cardInfoSheet, mx, my, cardWidth, cardHeight, 21);
-            char currentSuit = deck.getCardSuit(currentDeckPos)[0];
+            int currentSuit = deck.getCardSuit(currentDeckPos);
             int currentValue = deck.getValue(currentDeckPos);
             bool currentIsRed = deck.isRed(currentDeckPos);
             bool currentIsBlack = deck.isBlack(currentDeckPos);
@@ -348,7 +378,7 @@ int main(int argc, char const *argv[]) {
             // foundation
             if (!didCardMove && currentStack != 1 && 
                 ((stackIndex[0] < 0 && currentValue == 1) ||
-                (stackIndex[0] >= 0 && deck.getCardSuit(foundation1[stackIndex[0]])[0] == currentSuit && 
+                (stackIndex[0] >= 0 && deck.getCardSuit(foundation1[stackIndex[0]]) == currentSuit && 
                 deck.getValue(foundation1[stackIndex[0]])+1 == currentValue))) {
                     stackIndex[0]++;
                     foundation1[stackIndex[0]] = currentDeckPos;
@@ -358,7 +388,7 @@ int main(int argc, char const *argv[]) {
             }
             if (!didCardMove && currentStack != 2 && 
                 ((stackIndex[1] < 0 && currentValue == 1) || 
-                (stackIndex[1] >= 0 && deck.getCardSuit(foundation2[stackIndex[1]])[0] == currentSuit &&
+                (stackIndex[1] >= 0 && deck.getCardSuit(foundation2[stackIndex[1]]) == currentSuit &&
                 deck.getValue(foundation2[stackIndex[1]])+1 == currentValue))) { 
                     stackIndex[1]++;
                     foundation2[stackIndex[1]] = currentDeckPos;
@@ -368,7 +398,7 @@ int main(int argc, char const *argv[]) {
             }
             if (!didCardMove && currentStack != 3 && 
                 ((stackIndex[2] < 0 && currentValue == 1) || 
-                (stackIndex[2] >= 0 && deck.getCardSuit(foundation3[stackIndex[2]])[0] == currentSuit &&
+                (stackIndex[2] >= 0 && deck.getCardSuit(foundation3[stackIndex[2]]) == currentSuit &&
                 deck.getValue(foundation3[stackIndex[2]])+1 == currentValue))) { 
                     stackIndex[2]++;
                     foundation3[stackIndex[2]] = currentDeckPos;
@@ -378,7 +408,7 @@ int main(int argc, char const *argv[]) {
             }
             if (!didCardMove && currentStack != 4 && 
                 ((stackIndex[3] < 0 && currentValue == 1) || 
-                (stackIndex[3] >= 0 && deck.getCardSuit(foundation4[stackIndex[3]])[0] == currentSuit &&
+                (stackIndex[3] >= 0 && deck.getCardSuit(foundation4[stackIndex[3]]) == currentSuit &&
                 deck.getValue(foundation4[stackIndex[3]])+1 == currentValue))) { 
                     stackIndex[3]++;
                     foundation4[stackIndex[3]] = currentDeckPos;
@@ -695,18 +725,18 @@ int main(int argc, char const *argv[]) {
 
             // display cards
             for (int pos = 0; pos < 23; pos++) {
-                if (pos <= stackIndex[0]) drawCard(deck, foundation1[pos], cardWidth, cardHeight, cardBack, cardFront);
-                if (pos <= stackIndex[1]) drawCard(deck, foundation2[pos], cardWidth, cardHeight, cardBack, cardFront);
-                if (pos <= stackIndex[2]) drawCard(deck, foundation3[pos], cardWidth, cardHeight, cardBack, cardFront);
-                if (pos <= stackIndex[3]) drawCard(deck, foundation4[pos], cardWidth, cardHeight, cardBack, cardFront);
-                if (pos <= stackIndex[4]) drawCard(deck, discard[pos], cardWidth, cardHeight, cardBack, cardFront);
-                if (pos <= stackIndex[5]) drawCard(deck, row1[pos], cardWidth, cardHeight, cardBack, cardFront);
-                if (pos <= stackIndex[6]) drawCard(deck, row2[pos], cardWidth, cardHeight, cardBack, cardFront);
-                if (pos <= stackIndex[7]) drawCard(deck, row3[pos], cardWidth, cardHeight, cardBack, cardFront);
-                if (pos <= stackIndex[8]) drawCard(deck, row4[pos], cardWidth, cardHeight, cardBack, cardFront);
-                if (pos <= stackIndex[9]) drawCard(deck, row5[pos], cardWidth, cardHeight, cardBack, cardFront);
-                if (pos <= stackIndex[10]) drawCard(deck, row6[pos], cardWidth, cardHeight, cardBack, cardFront);
-                if (pos <= stackIndex[11]) drawCard(deck, row7[pos], cardWidth, cardHeight, cardBack, cardFront);
+                if (pos <= stackIndex[0]) drawCard(deck, foundation1[pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                if (pos <= stackIndex[1]) drawCard(deck, foundation2[pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                if (pos <= stackIndex[2]) drawCard(deck, foundation3[pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                if (pos <= stackIndex[3]) drawCard(deck, foundation4[pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                if (pos <= stackIndex[4]) drawCard(deck, discard[pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                if (pos <= stackIndex[5]) drawCard(deck, row1[pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                if (pos <= stackIndex[6]) drawCard(deck, row2[pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                if (pos <= stackIndex[7]) drawCard(deck, row3[pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                if (pos <= stackIndex[8]) drawCard(deck, row4[pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                if (pos <= stackIndex[9]) drawCard(deck, row5[pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                if (pos <= stackIndex[10]) drawCard(deck, row6[pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                if (pos <= stackIndex[11]) drawCard(deck, row7[pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
             }
 
             EndDrawing();
