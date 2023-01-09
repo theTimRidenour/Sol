@@ -290,13 +290,8 @@ int main(int argc, char const *argv[]) {
             history = new Node(7, 6, 5);
             int drawIndex = 0;
             for (int i = 0; i < 24; i++) {
-                stacks[4][i] = 99;
-                if (i < 13) {
-                    stacks[0][i] = 99;
-                    stacks[1][i] = 99;
-                    stacks[2][i] = 99;
-                    stacks[3][i] = 99;
-                    // if (i < 12) dragCards[i] = 99;
+                for (int j = 0; j < 13; j++) {
+                    stacks[j][i] = 99;
                 }
             }
             for (int cnt = 0; cnt < 52; cnt++) {
@@ -323,31 +318,24 @@ int main(int argc, char const *argv[]) {
                 if (cnt == 0) {
                     deck.setX(cnt, 30);
                     stacks[5][0] = 0;
-                    for(int i = 1; i < 13; i++) stacks[5][i] = 99;
                 } else if (cnt == 1 || cnt == 7) {
                     deck.setX(cnt, 300);
                     stacks[6][0] = 1; stacks[6][1] = 7;
-                    for (int i = 2; i < 14; i++) stacks[6][i] = 99;
                 } else if (cnt == 2 || cnt == 8 || cnt == 13) {
                     deck.setX(cnt, 570);
                     stacks[7][0] = 2; stacks[7][1] = 8; stacks[7][2] = 13;
-                    for (int i = 3; i < 15; i++) stacks[7][i] = 99;
                 } else if (cnt == 3 || cnt == 9 || cnt == 14 || cnt == 18) {
                     deck.setX(cnt, 840);
                     stacks[8][0] = 3; stacks[8][1] = 9; stacks[8][2] = 14; stacks[8][3] = 18;
-                    for (int i = 4; i < 16; i++) stacks[8][i] = 99;
                 } else if (cnt == 4 || cnt == 10 || cnt == 15 || cnt == 19 || cnt == 22) {
                     deck.setX(cnt, 1110);
                     stacks[9][0] = 4; stacks[9][1] = 10; stacks[9][2] = 15; stacks[9][3] = 19; stacks[9][4] = 22;
-                    for (int i = 5; i < 17; i++) stacks[9][i] = 99;
                 } else if (cnt == 5 || cnt == 11 || cnt == 16 || cnt == 20 || cnt == 23 || cnt == 25) {
                     deck.setX(cnt, 1380);
                     stacks[10][0] = 5; stacks[10][1] = 11; stacks[10][2] = 16; stacks[10][3] = 20; stacks[10][4] = 23; stacks[10][5] = 25;
-                    for (int i = 6; i < 18; i++) stacks[10][i] = 99;
                 } else if (cnt == 6 || cnt == 12 || cnt == 17 || cnt == 21 || cnt == 24 || cnt == 26 || cnt == 27) {
                     deck.setX(cnt, 1650);
                     stacks[11][0] = 6; stacks[11][1] = 12; stacks[11][2] = 17; stacks[11][3] = 21; stacks[11][4] = 24; stacks[11][5] = 26; stacks[11][6] = 27;
-                    for (int i = 7; i < 19; i++) stacks[11][i] = 99;
                 } else {
                     deck.setX(cnt, 1650);
                     stacks[12][drawIndex] = cnt;
@@ -769,28 +757,15 @@ int main(int argc, char const *argv[]) {
             }
 
             // check rows
-            if (stackIndex[5] >= 0 && !deck.isFaceUp(stacks[5][stackIndex[5]])) deck.setFaceUp(stacks[5][stackIndex[5]], true);
-            if (stackIndex[6] >= 0 && !deck.isFaceUp(stacks[6][stackIndex[6]])) deck.setFaceUp(stacks[6][stackIndex[6]], true);
-            if (stackIndex[7] >= 0 && !deck.isFaceUp(stacks[7][stackIndex[7]])) deck.setFaceUp(stacks[7][stackIndex[7]], true);
-            if (stackIndex[8] >= 0 && !deck.isFaceUp(stacks[8][stackIndex[8]])) deck.setFaceUp(stacks[8][stackIndex[8]], true);
-            if (stackIndex[9] >= 0 && !deck.isFaceUp(stacks[9][stackIndex[9]])) deck.setFaceUp(stacks[9][stackIndex[9]], true);
-            if (stackIndex[10] >= 0 && !deck.isFaceUp(stacks[10][stackIndex[10]])) deck.setFaceUp(stacks[10][stackIndex[10]], true);
-            if (stackIndex[11] >= 0 && !deck.isFaceUp(stacks[11][stackIndex[11]])) deck.setFaceUp(stacks[11][stackIndex[11]], true);
+            for (int i = 5; i < 12; i++) {
+                if (stackIndex[i] >= 0 && !deck.isFaceUp(stacks[i][stackIndex[i]])) deck.setFaceUp(stacks[i][stackIndex[i]], true);
+            }
 
             // display cards
             for (int pos = 0; pos < 23; pos++) {
-                if (pos <= stackIndex[0]) drawCard(deck, stacks[0][pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
-                if (pos <= stackIndex[1]) drawCard(deck, stacks[1][pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
-                if (pos <= stackIndex[2]) drawCard(deck, stacks[2][pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
-                if (pos <= stackIndex[3]) drawCard(deck, stacks[3][pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
-                if (pos <= stackIndex[4]) drawCard(deck, stacks[4][pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
-                if (pos <= stackIndex[5]) drawCard(deck, stacks[5][pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
-                if (pos <= stackIndex[6]) drawCard(deck, stacks[6][pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
-                if (pos <= stackIndex[7]) drawCard(deck, stacks[7][pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
-                if (pos <= stackIndex[8]) drawCard(deck, stacks[8][pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
-                if (pos <= stackIndex[9]) drawCard(deck, stacks[9][pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
-                if (pos <= stackIndex[10]) drawCard(deck, stacks[10][pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
-                if (pos <= stackIndex[11]) drawCard(deck, stacks[11][pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                for (int i = 0; i < 12; i++) {
+                    if (pos <= stackIndex[i]) drawCard(deck, stacks[i][pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                }
             }
 
             EndDrawing();
