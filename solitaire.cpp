@@ -585,158 +585,30 @@ int main(int argc, char const *argv[]) {
             int currentRowMax = stackIndex[4 + currentStack];
 
             bool didCardMove = false;
-            if (!didCardMove && currentStack != 1 && 
-                ((stackIndex[5] < 0 && currentValue == 13) || 
-                (stackIndex[5] >= 0 &&
-                ((deck.isRed(stacks[5][stackIndex[5]]) && currentIsBlack) || 
-                (deck.isBlack(stacks[5][stackIndex[5]]) && currentIsRed)) &&
-                deck.getValue(stacks[5][stackIndex[5]])-1 == currentValue))) {
-                    for (int index = currentIndex; index <= currentRowMax; index++) {
-                        stackIndex[5]++;
-                        if (currentStack == 2) stacks[5][stackIndex[5]] = stacks[6][index];
-                        if (currentStack == 3) stacks[5][stackIndex[5]] = stacks[7][index];
-                        if (currentStack == 4) stacks[5][stackIndex[5]] = stacks[8][index];
-                        if (currentStack == 5) stacks[5][stackIndex[5]] = stacks[9][index];
-                        if (currentStack == 6) stacks[5][stackIndex[5]] = stacks[10][index];
-                        if (currentStack == 7) stacks[5][stackIndex[5]] = stacks[11][index];
+            for (int i = 1; i < 8; i++) {                   // Check stacks 5 - 11
+                if (!didCardMove && currentStack != i &&    // if card has not already been moved & both stacks are different.
+                    ((stackIndex[i+4] < 0 && currentValue == 13) ||  // move if new stack has no cards & current card is a King or 
+                    (stackIndex[i+4] >= 0 &&                                           // new stack has cards &
+                    ((deck.isRed(stacks[i+4][stackIndex[i+4]]) && currentIsBlack) ||   // ( new stacks top card is red & current card is black or
+                    (deck.isBlack(stacks[i+4][stackIndex[i+4]]) && currentIsRed)) &&   // new stacks top card is black & current card is red ) and
+                    deck.getValue(stacks[i+4][stackIndex[i+4]])-1 == currentValue))) { // value of current card is one less than new stacks top card.
                         
-                        deck.setX(stacks[5][stackIndex[5]], 30);
-                        deck.setY(stacks[5][stackIndex[5]], 396 + stackIndex[5]*cardGap);
-                    }
-                    didCardMove = true;
-            }
-            if (!didCardMove && currentStack != 2 && 
-                ((stackIndex[6] < 0 && currentValue == 13) || 
-                (stackIndex[6] >= 0 &&
-                ((deck.isRed(stacks[6][stackIndex[6]]) && currentIsBlack) || 
-                (deck.isBlack(stacks[6][stackIndex[6]]) && currentIsRed)) &&
-                deck.getValue(stacks[6][stackIndex[6]])-1 == currentValue))) {
-                    for (int index = currentIndex; index <= currentRowMax; index++) {
-                        stackIndex[6]++;
-                        if (currentStack == 1) stacks[6][stackIndex[6]] = stacks[5][index];
-                        if (currentStack == 3) stacks[6][stackIndex[6]] = stacks[7][index];
-                        if (currentStack == 4) stacks[6][stackIndex[6]] = stacks[8][index];
-                        if (currentStack == 5) stacks[6][stackIndex[6]] = stacks[9][index];
-                        if (currentStack == 6) stacks[6][stackIndex[6]] = stacks[10][index];
-                        if (currentStack == 7) stacks[6][stackIndex[6]] = stacks[11][index];
-                        
-                        deck.setX(stacks[6][stackIndex[6]], 300);
-                        deck.setY(stacks[6][stackIndex[6]], 396 + stackIndex[6]*cardGap);
-                    }
-                    didCardMove = true;
-            }
-            if (!didCardMove && currentStack != 3 && 
-                ((stackIndex[7] < 0 && currentValue == 13) || 
-                (stackIndex[7] >= 0 &&
-                ((deck.isRed(stacks[7][stackIndex[7]]) && currentIsBlack) || 
-                (deck.isBlack(stacks[7][stackIndex[7]]) && currentIsRed)) &&
-                deck.getValue(stacks[7][stackIndex[7]])-1 == currentValue))) {
-                    for (int index = currentIndex; index <= currentRowMax; index++) {
-                        stackIndex[7]++;
-                        if (currentStack == 2) stacks[7][stackIndex[7]] = stacks[6][index];
-                        if (currentStack == 1) stacks[7][stackIndex[7]] = stacks[5][index];
-                        if (currentStack == 4) stacks[7][stackIndex[7]] = stacks[8][index];
-                        if (currentStack == 5) stacks[7][stackIndex[7]] = stacks[9][index];
-                        if (currentStack == 6) stacks[7][stackIndex[7]] = stacks[10][index];
-                        if (currentStack == 7) stacks[7][stackIndex[7]] = stacks[11][index];
-                        
-                        deck.setX(stacks[7][stackIndex[7]], 570);
-                        deck.setY(stacks[7][stackIndex[7]], 396 + stackIndex[7]*cardGap);
-                    }
-                    didCardMove = true;
-            }
-            if (!didCardMove && currentStack != 4 &&
-                ((stackIndex[8] < 0 && currentValue == 13) || 
-                (stackIndex[8] >= 0 &&
-                ((deck.isRed(stacks[8][stackIndex[8]]) && currentIsBlack) || 
-                (deck.isBlack(stacks[8][stackIndex[8]]) && currentIsRed)) &&
-                deck.getValue(stacks[8][stackIndex[8]])-1 == currentValue))) {
-                    for (int index = currentIndex; index <= currentRowMax; index++) {
-                        stackIndex[8]++;
-                        if (currentStack == 2) stacks[8][stackIndex[8]] = stacks[6][index];
-                        if (currentStack == 3) stacks[8][stackIndex[8]] = stacks[7][index];
-                        if (currentStack == 1) stacks[8][stackIndex[8]] = stacks[5][index];
-                        if (currentStack == 5) stacks[8][stackIndex[8]] = stacks[9][index];
-                        if (currentStack == 6) stacks[8][stackIndex[8]] = stacks[10][index];
-                        if (currentStack == 7) stacks[8][stackIndex[8]] = stacks[11][index];
-                        
-                        deck.setX(stacks[8][stackIndex[8]], 840);
-                        deck.setY(stacks[8][stackIndex[8]], 396 + stackIndex[8]*cardGap);
-                    }
-                    didCardMove = true;
-            }
-            if (!didCardMove && currentStack != 5 && 
-                ((stackIndex[9] < 0 && currentValue == 13) ||
-                (stackIndex[9] >= 0 &&
-                ((deck.isRed(stacks[9][stackIndex[9]]) && currentIsBlack) ||
-                (deck.isBlack(stacks[9][stackIndex[9]]) && currentIsRed)) &&
-                deck.getValue(stacks[9][stackIndex[9]])-1 == currentValue))) {
-                    for (int index = currentIndex; index <= currentRowMax; index++) {
-                        stackIndex[9]++;
-                        if (currentStack == 2) stacks[9][stackIndex[9]] = stacks[6][index];
-                        if (currentStack == 3) stacks[9][stackIndex[9]] = stacks[7][index];
-                        if (currentStack == 4) stacks[9][stackIndex[9]] = stacks[8][index];
-                        if (currentStack == 1) stacks[9][stackIndex[9]] = stacks[5][index];
-                        if (currentStack == 6) stacks[9][stackIndex[9]] = stacks[10][index];
-                        if (currentStack == 7) stacks[9][stackIndex[9]] = stacks[11][index];
-                        
-                        deck.setX(stacks[9][stackIndex[9]], 1110);
-                        deck.setY(stacks[9][stackIndex[9]], 396 + stackIndex[9]*cardGap);
-                    }
-                    didCardMove = true;
-            }
-            if (!didCardMove && currentStack != 6 &&
-                ((stackIndex[10] < 0 && currentValue == 13) || 
-                (stackIndex[10] >= 0 &&
-                ((deck.isRed(stacks[10][stackIndex[10]]) && currentIsBlack) ||
-                (deck.isBlack(stacks[10][stackIndex[10]]) && currentIsRed)) &&
-                deck.getValue(stacks[10][stackIndex[10]])-1 == currentValue))) {
-                    for (int index = currentIndex; index <= currentRowMax; index++) {
-                        stackIndex[10]++;
-                        if (currentStack == 2) stacks[10][stackIndex[10]] = stacks[6][index];
-                        if (currentStack == 3) stacks[10][stackIndex[10]] = stacks[7][index];
-                        if (currentStack == 4) stacks[10][stackIndex[10]] = stacks[8][index];
-                        if (currentStack == 5) stacks[10][stackIndex[10]] = stacks[9][index];
-                        if (currentStack == 1) stacks[10][stackIndex[10]] = stacks[5][index];
-                        if (currentStack == 7) stacks[10][stackIndex[10]] = stacks[11][index];
-                        
-                        deck.setX(stacks[10][stackIndex[10]], 1380);
-                        deck.setY(stacks[10][stackIndex[10]], 396 + stackIndex[10]*cardGap);
-                    }
-                    didCardMove = true;
-            }
-            if (!didCardMove && currentStack != 7 && 
-                ((stackIndex[11] < 0 && currentValue == 13) ||
-                (stackIndex[11] >= 0 && 
-                ((deck.isRed(stacks[11][stackIndex[11]]) && currentIsBlack) || 
-                (deck.isBlack(stacks[11][stackIndex[11]]) && currentIsRed)) &&
-                deck.getValue(stacks[11][stackIndex[11]])-1 == currentValue))) {
-                    for (int index = currentIndex; index <= currentRowMax; index++) {
-                        stackIndex[11]++;
-                        if (currentStack == 2) stacks[11][stackIndex[11]] = stacks[6][index];
-                        if (currentStack == 3) stacks[11][stackIndex[11]] = stacks[7][index];
-                        if (currentStack == 4) stacks[11][stackIndex[11]] = stacks[8][index];
-                        if (currentStack == 5) stacks[11][stackIndex[11]] = stacks[9][index];
-                        if (currentStack == 6) stacks[11][stackIndex[11]] = stacks[10][index];
-                        if (currentStack == 1) stacks[11][stackIndex[11]] = stacks[5][index];
-                        
-                        deck.setX(stacks[11][stackIndex[11]], 1650);
-                        deck.setY(stacks[11][stackIndex[11]], 396 + stackIndex[11]*cardGap);
-                    }
-                    didCardMove = true;
+                        // Move currently select cards and all cards on top of it to new stack.
+                        for (int index = currentIndex; index <= currentRowMax; index++) {
+                            stackIndex[i+4]++;
+                            if (currentStack != i ) stacks[i+4][stackIndex[i+4]] = stacks[currentStack+4][index];
+                            deck.setX(stacks[i+4][stackIndex[i+4]], 30 + (i-1)*(30+cardWidth));
+                            deck.setY(stacks[i+4][stackIndex[i+4]], 396 + stackIndex[i+4]*cardGap);
+                        }
+                        didCardMove = true; // card(s) have been moved
+                }
             }
 
             if (didCardMove) {
                 for (int pos = currentRowMax; pos >= currentIndex; pos--) {
-                    if (currentStack == 1) stacks[5][pos] = 99;
-                    if (currentStack == 2) stacks[6][pos] = 99;
-                    if (currentStack == 3) stacks[7][pos] = 99;
-                    if (currentStack == 4) stacks[8][pos] = 99;
-                    if (currentStack == 5) stacks[9][pos] = 99;
-                    if (currentStack == 6) stacks[10][pos] = 99;
-                    if (currentStack == 7) stacks[11][pos] = 99;
+                    stacks[currentStack + 4][pos] = 99;              // Removed any cards that have been moved &
+                    stackIndex[currentStack + 4] = currentIndex - 1; // change stacks index value to match.
                 }
-                stackIndex[currentStack + 4] = currentIndex - 1;
             }
         }
 
