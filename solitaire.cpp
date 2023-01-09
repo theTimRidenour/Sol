@@ -558,14 +558,13 @@ int main(int argc, char const *argv[]) {
         }
 
         int faceIndex[7][19][2];
-        for (int i = 0; i < 7; i++) for (int j = 0; j < 19; j++) faceIndex[i][j][0] = 99;
-        for (int pos = stackIndex[5]-1; pos >= 0; pos--) if (deck.isFaceUp(stacks[5][pos])) { faceIndex[0][pos][0] = stacks[5][pos]; faceIndex[0][pos][1] = deck.getY(stacks[5][pos]); }
-        for (int pos = stackIndex[6]-1; pos >= 0; pos--) if (deck.isFaceUp(stacks[6][pos])) { faceIndex[1][pos][0] = stacks[6][pos]; faceIndex[1][pos][1] = deck.getY(stacks[6][pos]); }
-        for (int pos = stackIndex[7]-1; pos >= 0; pos--) if (deck.isFaceUp(stacks[7][pos])) { faceIndex[2][pos][0] = stacks[7][pos]; faceIndex[2][pos][1] = deck.getY(stacks[7][pos]); }
-        for (int pos = stackIndex[8]-1; pos >= 0; pos--) if (deck.isFaceUp(stacks[8][pos])) { faceIndex[3][pos][0] = stacks[8][pos]; faceIndex[3][pos][1] = deck.getY(stacks[8][pos]); }
-        for (int pos = stackIndex[9]-1; pos >= 0; pos--) if (deck.isFaceUp(stacks[9][pos])) { faceIndex[4][pos][0] = stacks[9][pos]; faceIndex[4][pos][1] = deck.getY(stacks[9][pos]); }
-        for (int pos = stackIndex[10]-1; pos >= 0; pos--) if (deck.isFaceUp(stacks[10][pos])) { faceIndex[5][pos][0] = stacks[10][pos]; faceIndex[5][pos][1] = deck.getY(stacks[10][pos]); }
-        for (int pos = stackIndex[11]-1; pos >= 0; pos--) if (deck.isFaceUp(stacks[11][pos])) { faceIndex[6][pos][0] = stacks[11][pos]; faceIndex[6][pos][1] = deck.getY(stacks[11][pos]); }
+        for (int i = 0; i < 7; i++) {
+            for (int j = 0; j < 19; j++) faceIndex[i][j][0] = 99;
+            for (int pos = stackIndex[i+5]-1; pos >= 0; pos--) if (deck.isFaceUp(stacks[i+5][pos])) {
+                faceIndex[i][pos][0] = stacks[i+5][pos];
+                faceIndex[i][pos][1] = deck.getY(stacks[i+5][pos]);
+            }
+        }
 
         // middle
         if (isOverFaceUpMiddle(stackIndex, faceIndex, mx, my, cardWidth, cardGap) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -636,7 +635,11 @@ int main(int argc, char const *argv[]) {
             // display cards
             for (int pos = 0; pos < 23; pos++) {
                 for (int i = 0; i < 12; i++) {
-                    if (pos <= stackIndex[i]) drawCard(deck, stacks[i][pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                    if (i < 5) {
+                        if (stackIndex[i] >= 0) drawCard(deck, stacks[i][stackIndex[i]], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                    } else {
+                        if (pos <= stackIndex[i]) drawCard(deck, stacks[i][pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                    }
                 }
             }
 
