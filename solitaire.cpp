@@ -113,36 +113,32 @@ class Node {
         int cardIndex;
         int currentStack;
         int previousStack;
+        bool prevFaceUp;
 
         Node();
 
-        Node(int cardIndex, int currentStack, int previousStack) {
+        Node(int cardIndex, int currentStack, int previousStack, bool prevFaceUp) {
             this->cardIndex = cardIndex;
             this->currentStack = currentStack;
             this->previousStack = previousStack;
+            this->prevFaceUp = prevFaceUp;
             this->next = NULL;
         }
     Node* next;
 };
 
-void push(struct Node** headRef, int cardIndex, int currentStack, int previousStack) {
+void push(struct Node** headRef, int cardIndex, int currentStack, int previousStack, bool prevFaceUp) {
     struct Node* newNode = (struct Node*) malloc(sizeof(struct Node));
     newNode->cardIndex = cardIndex;
     newNode->currentStack = currentStack;
     newNode->previousStack = previousStack;
+    newNode->prevFaceUp = prevFaceUp;
     newNode->next = ( *headRef );
     ( *headRef ) = newNode;
 };
 
 void pop(struct Node** headRef) {
     ( *headRef ) = ( *headRef )->next;
-};
-
-void printList(Node* n) {
-    while(n != NULL) {
-        std::cout << n->cardIndex << ": " << n->currentStack << ", " << n->previousStack << "\n";
-        n = n->next;
-    }
 };
 
 struct cardGraphics {
@@ -287,7 +283,7 @@ int main(int argc, char const *argv[]) {
 
         if (newGame) {
             deck.shuffle();
-            history = new Node(7, 6, 5);
+            history = NULL;
             int drawIndex = 0;
             for (int i = 0; i < 24; i++) {
                 for (int j = 0; j < 13; j++) {
@@ -357,13 +353,34 @@ int main(int argc, char const *argv[]) {
 
         // undo
         if (IsKeyPressed(KEY_BACKSPACE) && history != NULL) {
-            stackIndex[history->previousStack]++;
-            stacks[history->previousStack][stackIndex[history->previousStack]] = stacks[history->currentStack][stackIndex[history->currentStack]];
-            stacks[history->currentStack][stackIndex[history->currentStack]] = 99;
-            stackIndex[history->currentStack]--;
-            deck.setX(history->cardIndex, 30 + (history->previousStack-5)*(30+cardWidth));
-            deck.setY(history->cardIndex, 396 + cardGap*stackIndex[history->previousStack]);
-            pop(&history);
+            if(history->currentStack != 12) {
+                stackIndex[history->previousStack]++;
+                stacks[history->previousStack][stackIndex[history->previousStack]] = stacks[history->currentStack][stackIndex[history->currentStack]];
+                stacks[history->currentStack][stackIndex[history->currentStack]] = 99;
+                stackIndex[history->currentStack]--;
+                if (history->previousStack != 12 && history->previousStack != 4) {
+                    deck.setX(history->cardIndex, 30 + (history->previousStack-5)*(30+cardWidth));
+                    deck.setY(history->cardIndex, 396 + cardGap*stackIndex[history->previousStack]);
+                    deck.setFaceUp(history->cardIndex, history->prevFaceUp);
+                } else if (history->previousStack != 4) {
+                    deck.setX(history->cardIndex, 0);
+                    deck.setFaceUp(history->cardIndex, false);
+                } else {
+                    deck.setX(history->cardIndex, 1380);
+                    deck.setY(history->cardIndex, 30);
+                }
+                pop(&history);
+            } else {
+                for (int pos = stackIndex[12]; pos >= 0; pos--) {
+                    stackIndex[4]++;
+                    stacks[4][stackIndex[4]] = stacks[12][stackIndex[12]];
+                    stacks[12][stackIndex[12]] = 99;
+                    stackIndex[12]--;
+                    deck.setX(stacks[4][stackIndex[4]], 1380);
+                    deck.setFaceUp(stacks[4][stackIndex[4]], true);
+                }
+                pop(&history);
+            }
         }
 
         // click on stacks[12]
@@ -375,7 +392,9 @@ int main(int argc, char const *argv[]) {
                 deck.setFaceUp(stacks[4][stackIndex[4]], true);
                 stacks[12][stackIndex[12]] = 99;
                 stackIndex[12]--;
+                push(&history, stacks[4][stackIndex[4]], 4, 12, false);
             } else {
+                push(&history, 0, 12, 4, true);
                 while (stackIndex[4] >= 0) {
                     stackIndex[12]++;
                     stacks[12][stackIndex[12]] = stacks[4][stackIndex[4]];
@@ -393,18 +412,7 @@ int main(int argc, char const *argv[]) {
         cardInfoSheet[4][0] = 5; cardInfoSheet[5][0] = 6; cardInfoSheet[6][0] = 7; cardInfoSheet[7][0] = 8;
         cardInfoSheet[8][0] = 9; cardInfoSheet[9][0] = 10;cardInfoSheet[10][0]=11; cardInfoSheet[11][0]=12;
 
-        if (stackIndex[0] >= 0) cardInfoSheet[0][1] = stacks[0][stackIndex[0]];
-        if (stackIndex[1] >= 0) cardInfoSheet[1][1] = stacks[1][stackIndex[1]];
-        if (stackIndex[2] >= 0) cardInfoSheet[2][1] = stacks[2][stackIndex[2]];
-        if (stackIndex[3] >= 0) cardInfoSheet[3][1] = stacks[3][stackIndex[3]];
-        if (stackIndex[4] >= 0) cardInfoSheet[4][1] = stacks[4][stackIndex[4]];
-        if (stackIndex[5] >= 0) cardInfoSheet[5][1] = stacks[5][stackIndex[5]];
-        if (stackIndex[6] >= 0) cardInfoSheet[6][1] = stacks[6][stackIndex[6]];
-        if (stackIndex[7] >= 0) cardInfoSheet[7][1] = stacks[7][stackIndex[7]];
-        if (stackIndex[8] >= 0) cardInfoSheet[8][1] = stacks[8][stackIndex[8]];
-        if (stackIndex[9] >= 0) cardInfoSheet[9][1] = stacks[9][stackIndex[9]];
-        if (stackIndex[10] >= 0) cardInfoSheet[10][1] = stacks[10][stackIndex[10]];
-        if (stackIndex[11] >= 0) cardInfoSheet[11][1] = stacks[11][stackIndex[11]];
+        for (int i = 0; i < 12; i++) if (stackIndex[i] >= 0) cardInfoSheet[i][1] = stacks[i][stackIndex[i]];
 
         // top
         if (isOverFaceUpTop(stackIndex, mx, my, cardWidth, cardHeight, cardGap) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -415,140 +423,46 @@ int main(int argc, char const *argv[]) {
             bool currentIsRed = deck.isRed(currentDeckPos);
             bool currentIsBlack = deck.isBlack(currentDeckPos);
 
+            int newStack;
+
             bool didCardMove = false;
             // foundation
-            if (!didCardMove && currentStack != 1 && 
-                ((stackIndex[0] < 0 && currentValue == 1) ||
-                (stackIndex[0] >= 0 && deck.getCardSuit(stacks[0][stackIndex[0]]) == currentSuit && 
-                deck.getValue(stacks[0][stackIndex[0]])+1 == currentValue))) {
-                    stackIndex[0]++;
-                    stacks[0][stackIndex[0]] = currentDeckPos;
-                    deck.setX(currentDeckPos, 30);
-                    deck.setY(currentDeckPos, 30);
-                    didCardMove = true;
+            for (int i = 0; i < 4; i++) {
+                if (!didCardMove && currentStack != i+1 &&
+                    ((stackIndex[i] < 0 && currentValue == 1) ||
+                    (stackIndex[i] >= 0 && deck.getCardSuit(stacks[i][stackIndex[i]]) == currentSuit &&
+                    deck.getValue(stacks[i][stackIndex[i]])+1 == currentValue))) {
+                        newStack = i;
+                        stackIndex[i]++;
+                        stacks[i][stackIndex[i]] = currentDeckPos;
+                        deck.setX(currentDeckPos, 30 + i*(30+cardWidth));
+                        deck.setY(currentDeckPos, 30);
+                        didCardMove = true;
+                    }
             }
-            if (!didCardMove && currentStack != 2 && 
-                ((stackIndex[1] < 0 && currentValue == 1) || 
-                (stackIndex[1] >= 0 && deck.getCardSuit(stacks[1][stackIndex[1]]) == currentSuit &&
-                deck.getValue(stacks[1][stackIndex[1]])+1 == currentValue))) { 
-                    stackIndex[1]++;
-                    stacks[1][stackIndex[1]] = currentDeckPos;
-                    deck.setX(currentDeckPos, 300);
-                    deck.setY(currentDeckPos, 30);
-                    didCardMove = true; 
-            }
-            if (!didCardMove && currentStack != 3 && 
-                ((stackIndex[2] < 0 && currentValue == 1) || 
-                (stackIndex[2] >= 0 && deck.getCardSuit(stacks[2][stackIndex[2]]) == currentSuit &&
-                deck.getValue(stacks[2][stackIndex[2]])+1 == currentValue))) { 
-                    stackIndex[2]++;
-                    stacks[2][stackIndex[2]] = currentDeckPos;
-                    deck.setX(currentDeckPos, 570);
-                    deck.setY(currentDeckPos, 30);
-                    didCardMove = true; 
-            }
-            if (!didCardMove && currentStack != 4 && 
-                ((stackIndex[3] < 0 && currentValue == 1) || 
-                (stackIndex[3] >= 0 && deck.getCardSuit(stacks[3][stackIndex[3]]) == currentSuit &&
-                deck.getValue(stacks[3][stackIndex[3]])+1 == currentValue))) { 
-                    stackIndex[3]++;
-                    stacks[3][stackIndex[3]] = currentDeckPos;
-                    deck.setX(currentDeckPos, 840);
-                    deck.setY(currentDeckPos, 30);
-                    didCardMove = true; 
-            }
+
             // rows
-            if (!didCardMove && currentStack != 6 && 
-                ((stackIndex[5] < 0 && currentValue == 13) || 
-                (stackIndex[5] >= 0 && (deck.isRed(stacks[5][stackIndex[5]]) == currentIsBlack ||
-                deck.isBlack(stacks[5][stackIndex[5]]) == currentIsRed) &&
-                deck.getValue(stacks[5][stackIndex[5]])-1 == currentValue))) {
-                    stackIndex[5]++;
-                    stacks[5][stackIndex[5]] = currentDeckPos;
-                    deck.setX(currentDeckPos, 30);
-                    deck.setY(currentDeckPos, 396 + stackIndex[5]*cardGap);
-                    didCardMove = true;
-            }
-            if (!didCardMove && currentStack != 7 &&
-                ((stackIndex[6] < 0 && currentValue == 13) || 
-                (stackIndex[6] >= 0 && (deck.isRed(stacks[6][stackIndex[6]]) == currentIsBlack || 
-                deck.isBlack(stacks[6][stackIndex[6]]) == currentIsRed) &&
-                deck.getValue(stacks[6][stackIndex[6]])-1 == currentValue))) {
-                    stackIndex[6]++;
-                    stacks[6][stackIndex[6]] = currentDeckPos;
-                    deck.setX(currentDeckPos, 300);
-                    deck.setY(currentDeckPos, 396 + stackIndex[6]*cardGap);
-                    didCardMove = true;
-            }
-            if (!didCardMove && currentStack != 8 && 
-                ((stackIndex[7] < 0 && currentValue == 13) || 
-                (stackIndex[7] >= 0 && (deck.isRed(stacks[7][stackIndex[7]]) == currentIsBlack ||
-                deck.isBlack(stacks[7][stackIndex[7]]) == currentIsRed) &&
-                deck.getValue(stacks[7][stackIndex[7]])-1 == currentValue))) {
-                    stackIndex[7]++;
-                    stacks[7][stackIndex[7]] = currentDeckPos;
-                    deck.setX(currentDeckPos, 570);
-                    deck.setY(currentDeckPos, 396 + stackIndex[7]*cardGap);
-                    didCardMove = true;
-            }
-            if (!didCardMove && currentStack != 9 && 
-                ((stackIndex[8] < 0 && currentValue == 13) ||
-                (stackIndex[8] >= 0 && (deck.isRed(stacks[8][stackIndex[8]]) == currentIsBlack ||
-                deck.isBlack(stacks[8][stackIndex[8]]) == currentIsRed) &&
-                deck.getValue(stacks[8][stackIndex[8]])-1 == currentValue))) {
-                    stackIndex[8]++;
-                    stacks[8][stackIndex[8]] = currentDeckPos;
-                    deck.setX(currentDeckPos, 840);
-                    deck.setY(currentDeckPos, 396 + stackIndex[8]*cardGap);
-                    didCardMove = true;
-            }
-            if (!didCardMove && currentStack != 10 && 
-                ((stackIndex[9] < 0 && currentValue == 13) || 
-                (stackIndex[9] >= 0 && (deck.isRed(stacks[9][stackIndex[9]]) == currentIsBlack || 
-                deck.isBlack(stacks[9][stackIndex[9]]) == currentIsRed) &&
-                deck.getValue(stacks[9][stackIndex[9]])-1 == currentValue))) {
-                    stackIndex[9]++;
-                    stacks[9][stackIndex[9]] = currentDeckPos;
-                    deck.setX(currentDeckPos, 1110);
-                    deck.setY(currentDeckPos, 396 + stackIndex[9]*cardGap);
-                    didCardMove = true;
-            }
-            if (!didCardMove && currentStack != 11 && 
-                ((stackIndex[10] < 0 && currentValue == 13) ||
-                (stackIndex[10] >= 0 && (deck.isRed(stacks[10][stackIndex[10]]) == currentIsBlack ||
-                deck.isBlack(stacks[10][stackIndex[10]]) == currentIsRed) &&
-                deck.getValue(stacks[10][stackIndex[10]])-1 == currentValue))) {
-                    stackIndex[10]++;
-                    stacks[10][stackIndex[10]] = currentDeckPos;
-                    deck.setX(currentDeckPos, 1380);
-                    deck.setY(currentDeckPos, 396 + stackIndex[10]*cardGap);
-                    didCardMove = true;
-            }
-            if (!didCardMove && currentStack != 12 && 
-                ((stackIndex[11] < 0 && currentValue == 13) ||
-                (stackIndex[11] >= 0 && (deck.isRed(stacks[11][stackIndex[11]]) == currentIsBlack ||
-                deck.isBlack(stacks[11][stackIndex[11]]) == currentIsRed) &&
-                deck.getValue(stacks[11][stackIndex[11]])-1 == currentValue))) {
-                    stackIndex[11]++;
-                    stacks[11][stackIndex[11]] = currentDeckPos;
-                    deck.setX(currentDeckPos, 1650);
-                    deck.setY(currentDeckPos, 396 + stackIndex[11]*cardGap);
-                    didCardMove = true;
+            for (int i = 5; i < 12; i++) {
+                if (!didCardMove && currentStack != i+1 &&
+                    ((stackIndex[i] < 0 && currentValue == 13) ||
+                    (stackIndex[i] >= 0 && (deck.isRed(stacks[i][stackIndex[i]]) == currentIsBlack ||
+                    deck.isBlack(stacks[i][stackIndex[i]]) == currentIsRed) &&
+                    deck.getValue(stacks[i][stackIndex[i]])-1 == currentValue))) {
+                        newStack = i;
+                        stackIndex[i]++;
+                        stacks[i][stackIndex[i]] = currentDeckPos;
+                        deck.setX(currentDeckPos, 30 + (i-5)*(30+cardWidth));
+                        deck.setY(currentDeckPos, 396 + stackIndex[i]*cardGap);
+                        didCardMove = true;
+                    }
             }
 
             if (didCardMove) {
-                if (currentStack == 1) { stacks[0][stackIndex[0]] = 99; stackIndex[0]--; }
-                if (currentStack == 2) { stacks[1][stackIndex[1]] = 99; stackIndex[1]--; }
-                if (currentStack == 3) { stacks[2][stackIndex[2]] = 99; stackIndex[2]--; }
-                if (currentStack == 4) { stacks[3][stackIndex[3]] = 99; stackIndex[3]--; }
-                if (currentStack == 5) { stacks[4][stackIndex[4]] = 99; stackIndex[4]--; }
-                if (currentStack == 6) { stacks[5][stackIndex[5]] = 99; stackIndex[5]--; }
-                if (currentStack == 7) { stacks[6][stackIndex[6]] = 99; stackIndex[6]--; }
-                if (currentStack == 8) { stacks[7][stackIndex[7]] = 99; stackIndex[7]--; }
-                if (currentStack == 9) { stacks[8][stackIndex[8]] = 99; stackIndex[8]--; }
-                if (currentStack == 10) { stacks[9][stackIndex[9]] = 99; stackIndex[9]--; }
-                if (currentStack == 11) { stacks[10][stackIndex[10]] = 99; stackIndex[10]--; }
-                if (currentStack == 12) { stacks[11][stackIndex[11]] = 99; stackIndex[11]--; }
+                bool prevFaceUp = false;
+                if (stackIndex[currentStack-1] >= 0) prevFaceUp = deck.isFaceUp(stacks[currentStack-1][stackIndex[currentStack-2]]);
+                push(&history, currentDeckPos, newStack, currentStack-1, prevFaceUp);
+                stacks[currentStack-1][stackIndex[currentStack-1]] = 99;
+                stackIndex[currentStack-1]--;
             }
         }
  
@@ -565,6 +479,8 @@ int main(int argc, char const *argv[]) {
                 faceIndex[i][pos][1] = deck.getY(stacks[i+5][pos]);
             }
         }
+
+        int newStack;
 
         // middle
         if (isOverFaceUpMiddle(stackIndex, faceIndex, mx, my, cardWidth, cardGap) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -592,6 +508,7 @@ int main(int argc, char const *argv[]) {
                     (deck.isBlack(stacks[i+4][stackIndex[i+4]]) && currentIsRed)) &&   // new stacks top card is black & current card is red ) and
                     deck.getValue(stacks[i+4][stackIndex[i+4]])-1 == currentValue))) { // value of current card is one less than new stacks top card.
                         
+                        newStack = i;  // new stack position for history
                         // Move currently select cards and all cards on top of it to new stack.
                         for (int index = currentIndex; index <= currentRowMax; index++) {
                             stackIndex[i+4]++;
@@ -604,6 +521,9 @@ int main(int argc, char const *argv[]) {
             }
 
             if (didCardMove) {
+                bool prevFaceUp = false;
+                if (stackIndex[currentStack-1] >= 0) prevFaceUp = deck.isFaceUp(stacks[currentStack-1][stackIndex[currentStack-2]]);
+                push(&history, currentDeckPos, newStack, currentStack-1, prevFaceUp); // Add move to history.
                 for (int pos = currentRowMax; pos >= currentIndex; pos--) {
                     stacks[currentStack + 4][pos] = 99;              // Removed any cards that have been moved &
                     stackIndex[currentStack + 4] = currentIndex - 1; // change stacks index value to match.
