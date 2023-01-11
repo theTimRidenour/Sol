@@ -2,39 +2,7 @@
 #include <iostream>
 #include <string>
 #include "deck.h"
-
-class Node {
-    public:
-        int cardIndex;
-        int currentStack;
-        int previousStack;
-        bool prevFaceUp;
-
-        Node();
-
-        Node(int cardIndex, int currentStack, int previousStack, bool prevFaceUp) {
-            this->cardIndex = cardIndex;
-            this->currentStack = currentStack;
-            this->previousStack = previousStack;
-            this->prevFaceUp = prevFaceUp;
-            this->next = NULL;
-        }
-    Node* next;
-};
-
-void push(struct Node** headRef, int cardIndex, int currentStack, int previousStack, bool prevFaceUp) {
-    struct Node* newNode = (struct Node*) malloc(sizeof(struct Node));
-    newNode->cardIndex = cardIndex;
-    newNode->currentStack = currentStack;
-    newNode->previousStack = previousStack;
-    newNode->prevFaceUp = prevFaceUp;
-    newNode->next = ( *headRef );
-    ( *headRef ) = newNode;
-};
-
-void pop(struct Node** headRef) {
-    ( *headRef ) = ( *headRef )->next;
-};
+#include "history.h"
 
 struct cardGraphics {
     cardGraphics(): cardFaces(), cardBacks(), customCardFace(false) { }
@@ -136,7 +104,7 @@ int main(int argc, char const *argv[]) {
     InitWindow(WIN_WIDTH, WIN_HEIGHT, "Solitaire");
 
     // game variables
-    Node* history = NULL;
+    History* history = NULL;
     bool newGame = true;
     bool useGraphics = true;
     // bool won = false;
