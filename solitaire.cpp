@@ -1,14 +1,12 @@
 #include "raylib.h"
-#include <iostream>
-#include <string>
 #include "deck.h"
 #include "history.h"
 
 struct cardGraphics {
-    cardGraphics(): cardFaces(), cardBacks(), customCardFace(false) { }
+    cardGraphics(): cardFaces(), cardBacks(), customBackground(false) { }
     Texture2D cardFaces;
     Texture2D cardBacks;
-    bool customCardFace = false;
+    bool customBackground = false;
 };
 
 void drawCard(Deck deck, int index, float cardWidth, float cardHeight, Color cardBack, Color cardFront, bool usingGraphics = false, cardGraphics cg = cardGraphics()) {
@@ -16,11 +14,7 @@ void drawCard(Deck deck, int index, float cardWidth, float cardHeight, Color car
     if (!deck.isFaceUp(index)) {
         DrawRectangleRounded(rec, 0.1, 5, cardBack);
     } else {
-        if (cg.customCardFace) {
-            // Add code for custom card face.
-        } else {
-            DrawRectangleRounded(rec, 0.1, 5, cardFront);
-        }
+        if (!cg.customBackground) DrawRectangleRounded(rec, 0.1, 5, cardFront);
         if (!usingGraphics) {
             Color color;
             if (deck.isRed(index)) color = RED;
@@ -30,11 +24,15 @@ void drawCard(Deck deck, int index, float cardWidth, float cardHeight, Color car
             float x = (deck.getValue(index)-1) * cg.cardFaces.width/13;
 
             float y = deck.getCardSuit(index);
-            if (cg.customCardFace) y *= cg.cardFaces.height/5;
+            if (cg.customBackground) y *= cg.cardFaces.height/5;
             else y *= cg.cardFaces.height/4;
 
             Rectangle rec{x, y, cardWidth, cardHeight};
             Vector2 pos{(float)deck.getX(index), (float)deck.getY(index)};
+            if (cg.customBackground) {
+                Rectangle bgRec{0, cg.cardFaces.height/5*4, cardWidth, cardHeight};
+                DrawTextureRec(cg.cardFaces, bgRec, pos, WHITE);
+            }
             DrawTextureRec(cg.cardFaces, rec, pos, WHITE);
         }
     }
@@ -116,7 +114,8 @@ int main(int argc, char const *argv[]) {
 
     // graphics
     cardGraphics cg;
-    cg.cardFaces = {LoadTexture("assets/playing-card-faces.png")};
+    cg.cardFaces = {LoadTexture("assets/playing-card-faces2.png")};
+    cg.customBackground = true;
     Texture2D bg;
     bg = {LoadTexture("assets/bg01.png")};
     Rectangle bgRec{0, 0, 1920, 1080};
