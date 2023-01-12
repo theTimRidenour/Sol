@@ -65,30 +65,29 @@ bool selectedCardFaceUp(int stackIndex[12], int mx, int my, int cardWidth, int c
     return topFaceUp || middleFaceUp;
 }
 
-int topCardSelected(int returnValue, int stackIndex[12], int rowDataSheet[12][2], int mx, int my, int cardWidth, int cardHeight, int cardGap) {
-    if (stackIndex[0] >= 0 && mx >= 30 && mx <= 30 + cardWidth && my >= 30 && my <= 30 + cardHeight) return rowDataSheet[0][returnValue];
-    if (stackIndex[1] >= 0 && mx >= 300 && mx <= 300 + cardWidth && my >= 30 && my <= 30 + cardHeight) return rowDataSheet[1][returnValue];
-    if (stackIndex[2] >= 0 && mx >= 570 && mx <= 570 + cardWidth && my >= 30 && my <= 30 + cardHeight) return rowDataSheet[2][returnValue];
-    if (stackIndex[3] >= 0 && mx >= 840 && mx <= 840 + cardWidth && my >= 30 && my <= 30 + cardHeight) return rowDataSheet[3][returnValue];
-    if (stackIndex[4] >= 0 && mx >= 1380 && mx <= 1380 + cardWidth && my >= 30 && my <= 30 + cardHeight) return rowDataSheet[4][returnValue];
-    if (stackIndex[5] >= 0 && mx >= 30 && mx <= 30 + cardWidth && my >= 396 + (stackIndex[5])*cardGap && my <= 396 + (stackIndex[5])*cardGap + cardHeight) return rowDataSheet[5][returnValue];
-    if (stackIndex[6] >= 0 && mx >= 300 && mx <= 300 + cardWidth && my >= 396 + (stackIndex[6])*cardGap && my <= 396 + (stackIndex[6])*cardGap + cardHeight) return rowDataSheet[6][returnValue];
-    if (stackIndex[7] >= 0 && mx >= 570 && mx <= 570 + cardWidth && my >= 396 + (stackIndex[7])*cardGap && my <= 396 + (stackIndex[7])*cardGap + cardHeight) return rowDataSheet[7][returnValue];
-    if (stackIndex[8] >= 0 && mx >= 840 && mx <= 840 + cardWidth && my >= 396 + (stackIndex[8])*cardGap && my <= 396 + (stackIndex[8])*cardGap + cardHeight) return rowDataSheet[8][returnValue];
-    if (stackIndex[9] >= 0 && mx >= 1110 && mx <= 1110 + cardWidth && my >= 396 + (stackIndex[9])*cardGap && my <= 396 + (stackIndex[9])*cardGap + cardHeight) return rowDataSheet[9][returnValue];
-    if (stackIndex[10] >= 0 && mx >= 1380 && mx <= 1380 + cardWidth && my >= 396 + (stackIndex[10])*cardGap && my <= 396 + (stackIndex[10])*cardGap + cardHeight) return rowDataSheet[10][returnValue];
-    if (stackIndex[11] >= 0 && mx >= 1650 && mx <= 1650 + cardWidth && my >= 396 + (stackIndex[11])*cardGap && my <= 396 + (stackIndex[11])*cardGap + cardHeight) return rowDataSheet[11][returnValue];
-    return 99;
-}
-
-int middleCardSelected(int returnValue, int stackIndex[12], int faceIndex[7][19][2], int mx, int my, int cardWidth, int midHeight) {
-    for (int i = 0; i < 7; i++) {
-        for (int j = 0; j < 19; j++) {
-            if (faceIndex[i][j][0] != 99 && mx >= 30 + (cardWidth+30)*i && mx <= 30 + cardWidth + (cardWidth+30)*i &&
-                my >= faceIndex[i][j][1] && my <= faceIndex[i][j][1] + midHeight) {
-                    if (returnValue == 0) return i + 1;
-                    if (returnValue == 1) return faceIndex[i][j][0];
-                }
+int selectedCardData(int returnValue, int stackIndex[12], int mx, int my, int cardWidth, int cardHeight, int cardGap, int rowDataSheet[12][2] = NULL, int faceIndex[7][19][2] = NULL) {
+    if (faceIndex == NULL) {
+        int pos = 0;
+        while (pos < 5) {
+            if (pos < 4 && stackIndex[pos] >= 0 && mx >= 30 + pos*(cardWidth+30) && mx <= 30 + cardWidth + pos*(cardWidth+30) &&
+                my >= 30 && my <= 30 + cardHeight) return rowDataSheet[pos][returnValue];
+            if (stackIndex[pos] >= 0 && mx >= 1380 && mx <= 1380 + cardWidth && my >= 30 && my <= 30 + cardHeight) return rowDataSheet[pos][returnValue];
+            pos++;
+        }
+        while (pos < 12) {
+            if (stackIndex[pos] >= 0 && mx >= 30 + (pos-5)*(30+cardWidth) && mx <= 30 + cardWidth + (pos-5)*(30+cardWidth) && 
+                my >= 396 + (stackIndex[pos])*cardGap && my <= 396 + (stackIndex[pos])*cardGap + cardHeight) return rowDataSheet[pos][returnValue];
+            pos++;
+        }
+    } else {
+        for (int i = 0; i < 7; i++) {
+            for (int j = 0; j < 19; j++) {
+                if (faceIndex[i][j][0] != 99 && mx >= 30 + (cardWidth+30)*i && mx <= 30 + cardWidth + (cardWidth+30)*i &&
+                    my >= faceIndex[i][j][1] && my <= faceIndex[i][j][1] + cardGap) {
+                        if (returnValue == 0) return i + 1;
+                        if (returnValue == 1) return faceIndex[i][j][0];
+                    }
+            }
         }
     }
     return 99;
@@ -279,8 +278,8 @@ int main(int argc, char const *argv[]) {
 
         // top
         if (selectedCardFaceUp(stackIndex, mx, my, cardWidth, cardHeight, cardGap) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            int currentStack = topCardSelected(0, stackIndex, cardInfoSheet, mx, my, cardWidth, cardHeight, cardGap);
-            int currentDeckPos = topCardSelected(1, stackIndex, cardInfoSheet, mx, my, cardWidth, cardHeight, cardGap);
+            int currentStack = selectedCardData(0, stackIndex, mx, my, cardWidth, cardHeight, cardGap, cardInfoSheet);
+            int currentDeckPos = selectedCardData(1, stackIndex, mx, my, cardWidth, cardHeight, cardGap, cardInfoSheet);
             int currentSuit = deck.getCardSuit(currentDeckPos);
             int currentValue = deck.getValue(currentDeckPos);
             bool currentIsRed = deck.isRed(currentDeckPos);
@@ -347,8 +346,8 @@ int main(int argc, char const *argv[]) {
 
         // middle
         if (selectedCardFaceUp(stackIndex, mx, my, cardWidth, cardHeight, cardGap, faceIndex) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            int currentStack = middleCardSelected(0, stackIndex, faceIndex, mx, my, cardWidth, cardGap);
-            int currentDeckPos = middleCardSelected(1, stackIndex, faceIndex, mx, my, cardWidth, cardGap);
+            int currentStack = selectedCardData(0, stackIndex, mx, my, cardWidth, cardHeight, cardGap, NULL, faceIndex);
+            int currentDeckPos = selectedCardData(1, stackIndex, mx, my, cardWidth, cardHeight, cardGap, NULL, faceIndex);
             int currentValue = deck.getValue(currentDeckPos);
             bool currentIsRed = deck.isRed(currentDeckPos);
             bool currentIsBlack = deck.isBlack(currentDeckPos);
