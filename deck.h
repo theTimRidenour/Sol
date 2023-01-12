@@ -24,9 +24,9 @@ class Deck {
             int cardValue = 0;  // value of card number [1] = ACE ... [13] = KING
             int suitValue = 0;  // value of suit number
             // for each suit by name
-            for (const char* s: {"CLUBS", "SPADES", "DIAMONDS", "HEARTS"}) {
+            for (const char *s: {"CLUBS", "SPADES", "DIAMONDS", "HEARTS"}) {
                 // for each value by name
-                for (const char* v: {"ACE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN", "JACK", "QUEEN", "KING"}) {
+                for (const char *v: {"ACE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN", "JACK", "QUEEN", "KING"}) {
                     cardValue = cnt + 1;
                     suitValue = 0;
                     while (cardValue > 13) {

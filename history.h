@@ -19,11 +19,11 @@ class History {
             this->prevFaceUp = prevFaceUp;
             this->next = NULL;
         }
-    History* next;
+    History *next;
 };
 
 void push(struct History** headRef, int cardIndex, int currentStack, int previousStack, bool prevFaceUp) {
-    struct History* newNode = (struct History*) malloc(sizeof(struct History));
+    struct History *newNode = (struct History*) malloc(sizeof(struct History));
     newNode->cardIndex = cardIndex;
     newNode->currentStack = currentStack;
     newNode->previousStack = previousStack;
@@ -32,7 +32,7 @@ void push(struct History** headRef, int cardIndex, int currentStack, int previou
     ( *headRef ) = newNode;
 };
 
-void pop(struct History** headRef) {
+void pop(struct History **headRef) {
     ( *headRef ) = ( *headRef )->next;
 };
 

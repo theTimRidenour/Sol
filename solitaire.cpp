@@ -30,7 +30,7 @@ void drawCard(Deck deck, int index, float cardWidth, float cardHeight, Color car
             Rectangle rec{x, y, cardWidth, cardHeight};
             Vector2 pos{(float)deck.getX(index), (float)deck.getY(index)};
             if (cg.customBackground) {
-                Rectangle bgRec{0, cg.cardFaces.height/5*4, cardWidth, cardHeight};
+                Rectangle bgRec{0, (float)(cg.cardFaces.height/5*4), cardWidth, cardHeight};
                 DrawTextureRec(cg.cardFaces, bgRec, pos, WHITE);
             }
             DrawTextureRec(cg.cardFaces, rec, pos, WHITE);
@@ -102,14 +102,14 @@ int main(int argc, char const *argv[]) {
     InitWindow(WIN_WIDTH, WIN_HEIGHT, "Solitaire");
 
     // game variables
-    History* history = NULL;
+    History *history = NULL;
     bool newGame = true;
     bool useGraphics = true;
     // bool won = false;
     int cardWidth = 240;
     int cardHeight = 336;
     int cardGap = 30;
-    Color cardBack = BLUE;
+    Color cardBack = PURPLE;
     Color cardFront = WHITE;
 
     // graphics
