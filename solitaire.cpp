@@ -39,8 +39,10 @@ void drawCard(Deck deck, int index, float cardWidth, float cardHeight, Color car
     DrawRectangleRoundedLines(rec, 0.1, 5, 0.5, BLACK);
 }
 
-bool isOverFaceUpTop(int stackIndex[12], int mx, int my, int cardWidth, int cardHeight, int cardGap) {
-    return (stackIndex[0] >= 0 && mx >= 30 && mx <= 30 + cardWidth && my >= 30 && my <= 30 + cardHeight) ||
+bool selectedCardFaceUp(int stackIndex[12], int mx, int my, int cardWidth, int cardHeight, int cardGap, int faceIndex[7][19][2] = NULL) {
+    bool topFaceUp, middleFaceUp = false;
+    if (faceIndex == NULL) {
+        topFaceUp = (stackIndex[0] >= 0 && mx >= 30 && mx <= 30 + cardWidth && my >= 30 && my <= 30 + cardHeight) ||
            (stackIndex[1] >= 0 && mx >= 300 && mx <= 300 + cardWidth && my >= 30 && my <= 30 + cardHeight) ||
            (stackIndex[2] >= 0 && mx >= 570 && mx <= 570 + cardWidth && my >= 30 && my <= 30 + cardHeight) ||
            (stackIndex[3] >= 0 && mx >= 840 && mx <= 840 + cardWidth && my >= 30 && my <= 30 + cardHeight) ||
@@ -52,16 +54,15 @@ bool isOverFaceUpTop(int stackIndex[12], int mx, int my, int cardWidth, int card
            (stackIndex[9] >= 0 && mx >= 1110 && mx <= 1110 + cardWidth && my >= 396 + (stackIndex[9])*cardGap && my <= 396 + (stackIndex[9])*cardGap + cardHeight) ||
            (stackIndex[10] >= 0 && mx >= 1380 && mx <= 1380 + cardWidth && my >= 396 + (stackIndex[10])*cardGap && my <= 396 + (stackIndex[10])*cardGap + cardHeight) ||
            (stackIndex[11] >= 0 && mx >= 1650 && mx <= 1650 + cardWidth && my >= 396 + (stackIndex[11])*cardGap && my <= 396 + (stackIndex[11])*cardGap + cardHeight);
-}
-
-bool isOverFaceUpMiddle(int stackIndex[12], int faceIndex[7][19][2], int mx, int my, int cardWidth, int midHeight) {
-    for (int i = 0; i < 7; i++) {
-        for (int j = 0; j < 19; j++) {
-            if (faceIndex[i][j][0] != 99 && mx >= 30 + (cardWidth+30)*i && mx <= 30 + cardWidth + (cardWidth+30)*i &&
-                my >= faceIndex[i][j][1] && my <= faceIndex[i][j][1] + midHeight) return true;
+    } else {
+        for (int i = 0; i < 7; i++) {
+            for (int j = 0; j < 19; j++) {
+                if (faceIndex[i][j][0] != 99 && mx >= 30 + (cardWidth+30)*i && mx <= 30 + cardWidth + (cardWidth+30)*i &&
+                    my >= faceIndex[i][j][1] && my <= faceIndex[i][j][1] + cardGap) middleFaceUp = true;
+            }
         }
     }
-    return false;
+    return topFaceUp || middleFaceUp;
 }
 
 int topCardSelected(int returnValue, int stackIndex[12], int rowDataSheet[12][2], int mx, int my, int cardWidth, int cardHeight, int cardGap) {
@@ -277,7 +278,7 @@ int main(int argc, char const *argv[]) {
         for (int i = 0; i < 12; i++) if (stackIndex[i] >= 0) cardInfoSheet[i][1] = stacks[i][stackIndex[i]];
 
         // top
-        if (isOverFaceUpTop(stackIndex, mx, my, cardWidth, cardHeight, cardGap) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        if (selectedCardFaceUp(stackIndex, mx, my, cardWidth, cardHeight, cardGap) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             int currentStack = topCardSelected(0, stackIndex, cardInfoSheet, mx, my, cardWidth, cardHeight, cardGap);
             int currentDeckPos = topCardSelected(1, stackIndex, cardInfoSheet, mx, my, cardWidth, cardHeight, cardGap);
             int currentSuit = deck.getCardSuit(currentDeckPos);
@@ -345,7 +346,7 @@ int main(int argc, char const *argv[]) {
         int newStack;
 
         // middle
-        if (isOverFaceUpMiddle(stackIndex, faceIndex, mx, my, cardWidth, cardGap) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        if (selectedCardFaceUp(stackIndex, mx, my, cardWidth, cardHeight, cardGap, faceIndex) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             int currentStack = middleCardSelected(0, stackIndex, faceIndex, mx, my, cardWidth, cardGap);
             int currentDeckPos = middleCardSelected(1, stackIndex, faceIndex, mx, my, cardWidth, cardGap);
             int currentValue = deck.getValue(currentDeckPos);
