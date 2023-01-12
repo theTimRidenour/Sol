@@ -292,10 +292,10 @@ int main(int argc, char const *argv[]) {
                 int j;
                 if (i < 4) j = 1;
                 else j = -1;
-                if (!didCardMove && currentStack != i+1 &&
-                    ((stackIndex[i] < 0 && ((i < 4 && currentValue == 1) || (i >= 4 && currentValue == 13))) ||
+                if (!didCardMove && currentStack != i+1 && i != 4 &&
+                    ((stackIndex[i] < 0 && ((i < 4 && currentValue == 1) || (i > 4 && currentValue == 13))) ||
                     ((stackIndex[i] >= 0 && deck.getValue(stacks[i][stackIndex[i]])+j == currentValue &&
-                    ((i < 4 && deck.getCardSuit(stacks[i][stackIndex[i]]) == currentSuit) || (i >= 4 &&
+                    ((i < 4 && deck.getCardSuit(stacks[i][stackIndex[i]]) == currentSuit) || (i > 4 &&
                     (deck.isRed(stacks[i][stackIndex[i]]) == currentIsBlack ||
                     deck.isBlack(stacks[i][stackIndex[i]]) == currentIsRed))))))) {
                         newStack = i;
@@ -314,7 +314,7 @@ int main(int argc, char const *argv[]) {
 
             if (didCardMove) {
                 bool prevFaceUp = false;
-                if (stackIndex[currentStack-1] >= 0) prevFaceUp = deck.isFaceUp(stacks[currentStack-1][stackIndex[currentStack-2]]);
+                if (stackIndex[currentStack-1] >= 0) prevFaceUp = deck.isFaceUp(stacks[currentStack][stackIndex[currentStack-1]]);
                 push(&history, currentDeckPos, newStack, currentStack-1, prevFaceUp);
                 stacks[currentStack-1][stackIndex[currentStack-1]] = 99;
                 stackIndex[currentStack-1]--;
