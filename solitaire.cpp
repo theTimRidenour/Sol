@@ -288,33 +288,26 @@ int main(int argc, char const *argv[]) {
             int newStack;
 
             bool didCardMove = false;
-            // foundation
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 12; i++) {
+                int j;
+                if (i < 4) j = 1;
+                else j = -1;
                 if (!didCardMove && currentStack != i+1 &&
-                    ((stackIndex[i] < 0 && currentValue == 1) ||
-                    (stackIndex[i] >= 0 && deck.getCardSuit(stacks[i][stackIndex[i]]) == currentSuit &&
-                    deck.getValue(stacks[i][stackIndex[i]])+1 == currentValue))) {
+                    ((stackIndex[i] < 0 && ((i < 4 && currentValue == 1) || (i >= 4 && currentValue == 13))) ||
+                    ((stackIndex[i] >= 0 && deck.getValue(stacks[i][stackIndex[i]])+j == currentValue &&
+                    ((i < 4 && deck.getCardSuit(stacks[i][stackIndex[i]]) == currentSuit) || (i >= 4 &&
+                    (deck.isRed(stacks[i][stackIndex[i]]) == currentIsBlack ||
+                    deck.isBlack(stacks[i][stackIndex[i]]) == currentIsRed))))))) {
                         newStack = i;
                         stackIndex[i]++;
                         stacks[i][stackIndex[i]] = currentDeckPos;
-                        deck.setX(currentDeckPos, 30 + i*(30+cardWidth));
-                        deck.setY(currentDeckPos, 30);
-                        didCardMove = true;
-                    }
-            }
-
-            // rows
-            for (int i = 5; i < 12; i++) {
-                if (!didCardMove && currentStack != i+1 &&
-                    ((stackIndex[i] < 0 && currentValue == 13) ||
-                    (stackIndex[i] >= 0 && (deck.isRed(stacks[i][stackIndex[i]]) == currentIsBlack ||
-                    deck.isBlack(stacks[i][stackIndex[i]]) == currentIsRed) &&
-                    deck.getValue(stacks[i][stackIndex[i]])-1 == currentValue))) {
-                        newStack = i;
-                        stackIndex[i]++;
-                        stacks[i][stackIndex[i]] = currentDeckPos;
-                        deck.setX(currentDeckPos, 30 + (i-5)*(30+cardWidth));
-                        deck.setY(currentDeckPos, 396 + stackIndex[i]*cardGap);
+                        if (i < 4) {
+                            deck.setX(currentDeckPos, 30 + i*(30+cardWidth));
+                            deck.setY(currentDeckPos, 30);
+                        } else {
+                            deck.setX(currentDeckPos, 30 + (i-5)*(30+cardWidth));
+                            deck.setY(currentDeckPos, 396 + stackIndex[i]*cardGap);
+                        }
                         didCardMove = true;
                     }
             }
