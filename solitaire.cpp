@@ -377,7 +377,7 @@ int main(int argc, char const *argv[]) {
 
             if (didCardMove) {
                 bool prevFaceUp = false;
-                if (stackIndex[currentStack-1] >= 0) prevFaceUp = deck.isFaceUp(stacks[currentStack-1][stackIndex[currentStack-2]]);
+                if (stackIndex[currentStack-1] >= 0) prevFaceUp = deck.isFaceUp(stacks[currentStack][stackIndex[currentStack-1]]);
                 push(&history, currentDeckPos, newStack, currentStack-1, prevFaceUp); // Add move to history.
                 for (int pos = currentRowMax; pos >= currentIndex; pos--) {
                     stacks[currentStack + 4][pos] = 99;              // Removed any cards that have been moved &
