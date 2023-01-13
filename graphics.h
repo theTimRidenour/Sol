@@ -15,6 +15,14 @@ struct backGroundGraphics {
     Vector2 pos{0, 0};
 };
 
+struct menuGraphics {
+    Texture2D bg;
+    Texture2D button;
+    Texture2D buttonHover;
+    Texture2D buttonPressed;
+    Texture2D klondike;
+};
+
 cardGraphics selectCards(int option) {
     cardGraphics cg;
 
@@ -37,6 +45,17 @@ backGroundGraphics selectBG(int option) {
     }
 
     return bg;
+}
+
+menuGraphics loadMenuGraphics() {
+    menuGraphics load;
+    load.bg = {LoadTexture("assets/menu/background.png")};
+    load.button = {LoadTexture("assets/menu/button.png")};
+    load.buttonHover = {LoadTexture("assets/menu/button-hover.png")};
+    load.buttonPressed = {LoadTexture("assets/menu/button-pressed.png")};
+    load.klondike = {LoadTexture("assets/menu/klondike.png")};
+
+    return load;
 }
 
 #endif
