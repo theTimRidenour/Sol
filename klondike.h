@@ -369,8 +369,6 @@ class Klondike {
                 }
             }
 
-                BeginDrawing();
-                ClearBackground(LIGHTGRAY);
                 DrawTextureRec(bg.image, bg.rec, bg.pos, WHITE);
 
                 for (int p = 0; p < 5; p++) {
@@ -400,8 +398,6 @@ class Klondike {
                         }
                     }
                 }
-
-                EndDrawing();
         }
 
 };
