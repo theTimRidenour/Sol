@@ -34,9 +34,10 @@ int main(int argc, char const *argv[]) {
     InitWindow(WIN_WIDTH, WIN_HEIGHT, "Solitaire");
 
     // load graphics
-    cardGraphics cg = selectCards(1);
-    int isSelectedCard = 1;
-    backGroundGraphics bg = selectBG(1);
+    cardGraphics cg = selectCards(0);
+    int isSelectedCard = 0;
+    backGroundGraphics bg = selectBG(0);
+    int isSelectedBG = 0;
     menuGraphics menu = loadMenuGraphics();
 
     // initialize game(s)
@@ -47,6 +48,7 @@ int main(int argc, char const *argv[]) {
     bool exit = false; // end game & close window.
     bool cardFacesLoaded = false;
     Texture2D menuFaceCards[50];
+    backGroundGraphics menuBgImages[50];
     Color cardBack = PURPLE;
 
     SetTargetFPS(60);
@@ -75,19 +77,17 @@ int main(int argc, char const *argv[]) {
                 // Options
                 if (drawButton(GetMouseX(), GetMouseY(), IsMouseButtonDown(MOUSE_LEFT_BUTTON), IsMouseButtonReleased(MOUSE_LEFT_BUTTON), menu, "OPTIONS", 1)) {
                     menuOption = 1;
-                    int i = 1;
                     if (!cardFacesLoaded) {
-                        Image cardFacesImages;
-                        while (true) {
-                            char name[50];
-                            std::sprintf(name, "assets/playing-card-faces%d.png", i);
-                            cardFacesImages = LoadImage(name);
-                            ImageResize(&cardFacesImages, cardFacesImages.width/3, cardFacesImages.height/3);
-                            menuFaceCards[i] = LoadTextureFromImage(cardFacesImages);
-                            UnloadImage(cardFacesImages);
-                            if (!(menuFaceCards[i].width > 0)) { cardFacesLoaded = true; break; }
-                            i++;
+                        bool faceDone = false;
+                        bool bgDone = false;
+                        for (int i = 1; i < 50; i++) {
+                            if (!faceDone) menuFaceCards[i - 1] = loadFaceCard(i);
+                            if (!bgDone) menuBgImages[i - 1] = loadBg(i);
+                            if (!(menuFaceCards[i - 1].width > 0)) faceDone = true;
+                            if (!(menuBgImages[i - 1].image.width > 0)) bgDone = true;
+                            if (faceDone && bgDone) break;
                         }
+                        cardFacesLoaded = true;
                     }
                 }    
                 // Exit
@@ -101,40 +101,75 @@ int main(int argc, char const *argv[]) {
                     DrawTexture(menu.options, 27, 606, WHITE);
                     
             } else if (menuOption == 1) {
+                // option menu variables
+                float cardWidth = menuFaceCards[0].width/13;
+                float cardHeight = menuFaceCards[0].height/4;
+                float facePos = 58;
+                float backPos = 58;
+                float bgPos = 58;
+                int faceCnt = 0;
+                int faceRow = 0;
+                int backCnt = 0;
+                int backRow = 0;
+                int bgCnt = 0;
+                int bgRow = 0;
+
                 // card face
-                DrawText("CARD FACE", 837, 28, 20, BLACK);
-                for (int pos = 1; pos < 50; pos++) {
+                DrawText("CARD FACE", 837, facePos - 30, 20, BLACK);
+                for (int pos = 0; pos < 50; pos++) {
                     if (!(menuFaceCards[pos].width > 0)) break;
                     int bgImage = 0;
-                    if (menuFaceCards[pos].height == 448) bgImage = 0;
+                    if (menuFaceCards[pos].height == menuFaceCards[0].height) bgImage = 0;
                     else bgImage = 1;
-                    if (isSelectedCard == pos) DrawRectangleLines((float)837-3 + (pos -1)*(5 + menuFaceCards[pos].width/13), (float)58-3, (float)menuFaceCards[1].width/13 + 6, menuFaceCards[1].height/4 + 6, BLACK);
-                    if (bgImage == 1) DrawTextureRec(menuFaceCards[pos], {0, (float)menuFaceCards[pos].height/5*4, (float)menuFaceCards[pos].width/13, (float)menuFaceCards[pos].height/5}, {(float)837 + (pos -1)*(5 + menuFaceCards[pos].width/13), (float)58}, WHITE);
-                    else DrawRectangleRounded({(float)837 + (pos -1)*(5 + menuFaceCards[pos].width/13), (float)58, (float)menuFaceCards[pos].width/13, (float)menuFaceCards[pos].height/4}, .1, 5, WHITE);
-                    DrawTextureRec(menuFaceCards[pos], {0, 0, (float)menuFaceCards[pos].width/13, (float)menuFaceCards[pos].height/(4 + bgImage)}, {(float)837 + (pos-1)*(5 + menuFaceCards[pos].width/13), (float)58}, WHITE);
+                    if (isSelectedCard == pos) DrawRectangleLines(837-3 + faceCnt*(5 + cardWidth), facePos-3 + faceRow*(cardHeight + 5), cardWidth + 6, cardHeight + 6, BLACK);
+                    if (bgImage == 1) DrawTextureRec(menuFaceCards[pos], {0, cardHeight*4, cardWidth, cardHeight}, {837 + faceCnt*(5 + cardWidth), facePos + faceRow*(cardHeight + 5)}, WHITE);
+                    else DrawRectangleRounded({837 + faceCnt*(5 + cardWidth), facePos + faceRow*(cardHeight + 5), cardWidth, cardHeight}, .1, 5, WHITE);
+                    DrawTextureRec(menuFaceCards[pos], {0, 0, cardWidth, cardHeight}, {837 + faceCnt*(5 + cardWidth), facePos + faceRow*(cardHeight + 5)}, WHITE);
 
                     // card face selection
-                    if (GetMouseX() > 837 + (pos-1)*(5 + menuFaceCards[pos].width/13) && GetMouseX() < 837 + menuFaceCards[pos].width/13 + (pos-1)*(5 + menuFaceCards[pos].width/13) && GetMouseY() > 58 && GetMouseY() < 58 + menuFaceCards[pos].height/(4 + bgImage) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    if (GetMouseX() > 837 + faceCnt*(5 + cardWidth) && GetMouseX() < 837 + cardWidth + faceCnt*(5 + cardWidth) && GetMouseY() > facePos + faceRow*(cardHeight + 5) && GetMouseY() < facePos + faceRow*(cardHeight + 5) + cardHeight && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                         cg = selectCards(pos);
                         isSelectedCard = pos;
+                    }
+                    faceCnt++;
+                    if (faceCnt > 11) {
+                        faceCnt = 0;
+                        faceRow++;
                     }
                 }
 
                 // card back
-                float sPos = menuFaceCards[1].height/4 + 58 + 40;
-                float width = menuFaceCards[1].width/13;
-                float height = menuFaceCards[1].height/4;
-                int colorCnt = 0;
-                int colorRow = 0;
-                DrawText("CARD BACK", 837, sPos - 30, 20, BLACK);
+                backPos = cardHeight + facePos + faceRow*(cardHeight + 5) + 40;
+                DrawText("CARD BACK", 837, backPos - 30, 20, BLACK);
                 for (Color c: {BEIGE, BLACK, BLUE, BROWN, DARKBLUE, DARKBROWN, DARKGRAY, DARKGREEN, DARKPURPLE, GOLD, GRAY, GREEN, LIGHTGRAY, LIME, MAGENTA, MAROON, ORANGE, PINK, PURPLE, RED, SKYBLUE, VIOLET, WHITE, YELLOW}) {
-                    if (cardBack.a == c.a && cardBack.b == c.b && cardBack.g == c.g && cardBack.r == c.r) DrawRectangleLines(837 - 3 + colorCnt*(width+5), sPos - 3 + colorRow*(height+5), width + 6, height + 6, BLACK);
-                    DrawRectangleRounded({837 + colorCnt*(width+5), sPos + colorRow*(height+5), width, height}, 0.1, 5, c);
-                    if (GetMouseX() > 837 + colorCnt*(width+5) && GetMouseX() < 837 + width + colorCnt*(width+5) && GetMouseY() > sPos + colorRow*(height+5) && GetMouseY() < sPos + height + colorRow*(height+5) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) cardBack = c;
-                    colorCnt++;
-                    if (colorCnt > 11) {
-                        colorCnt = 0;
-                        colorRow++;
+                    if (cardBack.a == c.a && cardBack.b == c.b && cardBack.g == c.g && cardBack.r == c.r) DrawRectangleLines(837 - 3 + backCnt*(cardWidth + 5), backPos - 3 + backRow*(cardHeight+5), cardWidth + 6, cardHeight + 6, BLACK);
+                    DrawRectangleRounded({837 + backCnt*(cardWidth + 5), backPos + backRow*(cardHeight + 5), cardWidth, cardHeight}, 0.1, 5, c);
+                    if (GetMouseX() > 837 + backCnt*(cardWidth + 5) && GetMouseX() < 837 + cardWidth + backCnt*(cardWidth + 5) && GetMouseY() > backPos + backRow*(cardHeight + 5) && GetMouseY() < backPos + cardHeight + backRow*(cardHeight + 5) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) cardBack = c;
+                    backCnt++;
+                    if (backCnt > 11) {
+                        backCnt = 0;
+                        backRow++;
+                    }
+                }
+
+                // backgrounds
+                bgPos = backPos + backRow*(cardHeight + 5) + 40;
+                int bgWidth = 199;
+                int bgHeight = 112;
+                DrawText("BACKGROUND", 837, bgPos - 30, 20, BLACK);
+                for (int pos = 0; pos < 50; pos++) {
+                    if (!(menuBgImages[pos].image.width > 0)) break;
+                    if (isSelectedBG == pos) DrawRectangleLines(837-3 + bgCnt*(bgWidth + 5), bgPos-3 + bgRow*(bgHeight+5), bgWidth+6, bgHeight+6, BLACK);
+                    DrawTexture(menuBgImages[pos].image, 837 + bgCnt*(bgWidth+5), bgPos + bgRow*(bgHeight+5), WHITE);
+                    if (GetMouseX() > 837 + bgCnt*(bgWidth+5) && GetMouseX() < 837 + bgWidth + bgCnt*(bgWidth+5) && GetMouseY() > bgPos + bgRow*(bgHeight+5) && GetMouseY() < bgPos + bgHeight + bgRow*(bgHeight+5) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        bg = selectBG(pos);
+                        isSelectedBG = pos;
+                    }
+
+                    bgCnt++;
+                    if (bgCnt > 4) {
+                        bgCnt = 0;
+                        bgRow++;
                     }
                 }
             }
