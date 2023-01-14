@@ -28,15 +28,15 @@ struct menuGraphics {
 };
 
 cardGraphics selectCards(int option) {
-    cardGraphics cg;
+    cardGraphics cardgraphics;
     if (!(checkSize.width > 0)) checkSize = {LoadTexture("assets/cards/playing-card-faces1.png")};
 
     char fileName[50];
     std::sprintf(fileName, "assets/cards/playing-card-faces%d.png", option + 1);
-    cg.cardFaces = {LoadTexture(fileName)};
-    if (cg.cardFaces.height != checkSize.height) cg.customBackground = true;
+    cardgraphics.cardFaces = {LoadTexture(fileName)};
+    if (cardgraphics.cardFaces.height != checkSize.height) cardgraphics.customBackground = true;
 
-    return cg;
+    return cardgraphics;
 }
 
 backGroundGraphics selectBG(int option) {
