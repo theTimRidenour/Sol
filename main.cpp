@@ -12,8 +12,8 @@ int main(int argc, char const *argv[]) {
     int isSelectedCard = 0;
     int isSelectedBG = 0;
     Color cardBack = PURPLE;
-    cardGraphics cg; //= selectCards(0);
-    backGroundGraphics bg; //= selectBG(0);
+    cardGraphics cg;
+    backGroundGraphics bg;
 
     // initialize graphics
     cg = selectCards(0);
