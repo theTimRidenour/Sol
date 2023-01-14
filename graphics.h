@@ -21,6 +21,7 @@ struct menuGraphics {
     Texture2D buttonHover;
     Texture2D buttonPressed;
     Texture2D klondike;
+    Texture2D options;
 };
 
 cardGraphics selectCards(int option) {
@@ -54,6 +55,7 @@ menuGraphics loadMenuGraphics() {
     load.buttonHover = {LoadTexture("assets/menu/button-hover.png")};
     load.buttonPressed = {LoadTexture("assets/menu/button-pressed.png")};
     load.klondike = {LoadTexture("assets/menu/klondike.png")};
+    load.options = {LoadTexture("assets/menu/options.png")};
 
     return load;
 }

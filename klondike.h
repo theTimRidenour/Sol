@@ -102,7 +102,6 @@ class Klondike {
         int cardWidth = 240;
         int cardHeight = 336;
         int cardGap = 30;
-        Color cardBack = PURPLE;
         Color cardFront = WHITE;
 
         // stacks
@@ -121,7 +120,7 @@ class Klondike {
         int mx = GetMouseX();
         int my = GetMouseY();
 
-        void start(cardGraphics cg, backGroundGraphics bg) {
+        void start(cardGraphics cg, backGroundGraphics bg, Color cardBack) {
             // const float dT { GetFrameTime() };
             mx = GetMouseX();
             my = GetMouseY();
