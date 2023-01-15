@@ -40,24 +40,29 @@ void drawCard(Deck deck, int index, float cardWidth, float cardHeight, Color car
 
 bool selectedCardFaceUp(int stackIndex[12], int mx, int my, int cardWidth, int cardHeight, int cardGap, int faceIndex[7][19][2] = NULL) {
     bool topFaceUp, middleFaceUp = false;
+    int ccg[7];
+    for (int i = 5; i < 12; i++) {
+        if (stackIndex[i] > 6) ccg[i - 5] = 340/stackIndex[i];
+        else ccg[i-5] = cardGap;
+    }
     if (faceIndex == NULL) {
         topFaceUp = (stackIndex[0] >= 0 && mx >= 30 && mx <= 30 + cardWidth && my >= 30 && my <= 30 + cardHeight) ||
            (stackIndex[1] >= 0 && mx >= 300 && mx <= 300 + cardWidth && my >= 30 && my <= 30 + cardHeight) ||
            (stackIndex[2] >= 0 && mx >= 570 && mx <= 570 + cardWidth && my >= 30 && my <= 30 + cardHeight) ||
            (stackIndex[3] >= 0 && mx >= 840 && mx <= 840 + cardWidth && my >= 30 && my <= 30 + cardHeight) ||
            (stackIndex[4] >= 0 && mx >= 1380 && mx <= 1380 + cardWidth && my >= 30 && my <= 30 + cardHeight) ||
-           (stackIndex[5] >= 0 && mx >= 30 && mx <= 30 + cardWidth && my >= 396 + (stackIndex[5])*cardGap && my <= 396 + (stackIndex[5])*cardGap + cardHeight) ||
-           (stackIndex[6] >= 0 && mx >= 300 && mx <= 300 + cardWidth && my >= 396 + (stackIndex[6])*cardGap && my <= 396 + (stackIndex[6])*cardGap + cardHeight) ||
-           (stackIndex[7] >= 0 && mx >= 570 && mx <= 570 + cardWidth && my >= 396 + (stackIndex[7])*cardGap && my <= 396 + (stackIndex[7])*cardGap + cardHeight) ||
-           (stackIndex[8] >= 0 && mx >= 840 && mx <= 840 + cardWidth && my >= 396 + (stackIndex[8])*cardGap && my <= 396 + (stackIndex[8])*cardGap + cardHeight) ||
-           (stackIndex[9] >= 0 && mx >= 1110 && mx <= 1110 + cardWidth && my >= 396 + (stackIndex[9])*cardGap && my <= 396 + (stackIndex[9])*cardGap + cardHeight) ||
-           (stackIndex[10] >= 0 && mx >= 1380 && mx <= 1380 + cardWidth && my >= 396 + (stackIndex[10])*cardGap && my <= 396 + (stackIndex[10])*cardGap + cardHeight) ||
-           (stackIndex[11] >= 0 && mx >= 1650 && mx <= 1650 + cardWidth && my >= 396 + (stackIndex[11])*cardGap && my <= 396 + (stackIndex[11])*cardGap + cardHeight);
+           (stackIndex[5] >= 0 && mx >= 30 && mx <= 30 + cardWidth && my >= 396 + (stackIndex[5])*ccg[0] && my <= 396 + (stackIndex[5])*ccg[0] + cardHeight) ||
+           (stackIndex[6] >= 0 && mx >= 300 && mx <= 300 + cardWidth && my >= 396 + (stackIndex[6])*ccg[1] && my <= 396 + (stackIndex[6])*ccg[1] + cardHeight) ||
+           (stackIndex[7] >= 0 && mx >= 570 && mx <= 570 + cardWidth && my >= 396 + (stackIndex[7])*ccg[2] && my <= 396 + (stackIndex[7])*ccg[2] + cardHeight) ||
+           (stackIndex[8] >= 0 && mx >= 840 && mx <= 840 + cardWidth && my >= 396 + (stackIndex[8])*ccg[3] && my <= 396 + (stackIndex[8])*ccg[3] + cardHeight) ||
+           (stackIndex[9] >= 0 && mx >= 1110 && mx <= 1110 + cardWidth && my >= 396 + (stackIndex[9])*ccg[4] && my <= 396 + (stackIndex[9])*ccg[4] + cardHeight) ||
+           (stackIndex[10] >= 0 && mx >= 1380 && mx <= 1380 + cardWidth && my >= 396 + (stackIndex[10])*ccg[5] && my <= 396 + (stackIndex[10])*ccg[5] + cardHeight) ||
+           (stackIndex[11] >= 0 && mx >= 1650 && mx <= 1650 + cardWidth && my >= 396 + (stackIndex[11])*ccg[6] && my <= 396 + (stackIndex[11])*ccg[6] + cardHeight);
     } else {
         for (int i = 0; i < 7; i++) {
             for (int j = 0; j < 19; j++) {
                 if (faceIndex[i][j][0] != 99 && mx >= 30 + (cardWidth+30)*i && mx <= 30 + cardWidth + (cardWidth+30)*i &&
-                    my >= faceIndex[i][j][1] && my <= faceIndex[i][j][1] + cardGap) middleFaceUp = true;
+                    my >= faceIndex[i][j][1] && my <= faceIndex[i][j][1] + ccg[i]) middleFaceUp = true;
             }
         }
     }
@@ -65,6 +70,12 @@ bool selectedCardFaceUp(int stackIndex[12], int mx, int my, int cardWidth, int c
 }
 
 int selectedCardData(int returnValue, int stackIndex[12], int mx, int my, int cardWidth, int cardHeight, int cardGap, int rowDataSheet[12][2] = NULL, int faceIndex[7][19][2] = NULL) {
+    int ccg[7];
+    for (int i = 5; i < 12; i++) {
+        if (stackIndex[i] > 6) ccg[i-5] = 340/stackIndex[i];
+        else ccg[i-5] = cardGap;
+    }
+    
     if (faceIndex == NULL) {
         int pos = 0;
         while (pos < 5) {
@@ -75,14 +86,14 @@ int selectedCardData(int returnValue, int stackIndex[12], int mx, int my, int ca
         }
         while (pos < 12) {
             if (stackIndex[pos] >= 0 && mx >= 30 + (pos-5)*(30+cardWidth) && mx <= 30 + cardWidth + (pos-5)*(30+cardWidth) && 
-                my >= 396 + (stackIndex[pos])*cardGap && my <= 396 + (stackIndex[pos])*cardGap + cardHeight) return rowDataSheet[pos][returnValue];
+                my >= 396 + (stackIndex[pos])*ccg[pos - 5] && my <= 396 + (stackIndex[pos])*ccg[pos - 5] + cardHeight) return rowDataSheet[pos][returnValue];
             pos++;
         }
     } else {
         for (int i = 0; i < 7; i++) {
             for (int j = 0; j < 19; j++) {
                 if (faceIndex[i][j][0] != 99 && mx >= 30 + (cardWidth+30)*i && mx <= 30 + cardWidth + (cardWidth+30)*i &&
-                    my >= faceIndex[i][j][1] && my <= faceIndex[i][j][1] + cardGap) {
+                    my >= faceIndex[i][j][1] && my <= faceIndex[i][j][1] + ccg[i]) {
                         if (returnValue == 0) return i + 1;
                         if (returnValue == 1) return faceIndex[i][j][0];
                     }
@@ -385,8 +396,10 @@ class Klondike {
                 }
             }
 
+            // draw background
             DrawTextureRec(bg.image, bg.rec, bg.pos, WHITE);
 
+            // draw foundation & discard boxes
             for (int p = 0; p < 5; p++) {
 
                 if (p < 4) {
