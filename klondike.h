@@ -103,7 +103,7 @@ class Klondike {
         // bool won = false;
         int cardWidth = 240;
         int cardHeight = 336;
-        int cardGap = 30;
+        int cardGap = 50;
         Color cardFront = WHITE;
 
         // stacks
@@ -404,6 +404,8 @@ class Klondike {
                 if (stackIndex[i] != refIndex[i]) {
                     int pos = 0;
                     refIndex[i] = stackIndex[i];
+                    int tempCardGap = cardGap;
+                    if (stackIndex[i] > 6) tempCardGap = 340/stackIndex[i];
                     while (stacks[i][pos] != 99 && pos < 24) {
                         if (i == 4) {
                             deck.setX(stacks[i][pos], 1380);
@@ -416,7 +418,7 @@ class Klondike {
                             deck.setY(stacks[i][pos], 30);
                         } else {
                             deck.setX(stacks[i][pos], 30 + (i -5 )*(cardWidth + 30));
-                            deck.setY(stacks[i][pos], 396 + pos*(cardGap));
+                            deck.setY(stacks[i][pos], 396 + pos*(tempCardGap));
                         }
                         pos++;
                     }
