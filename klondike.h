@@ -81,7 +81,7 @@ int selectedCardData(int returnValue, int stackIndex[12], int mx, int my, int ca
         while (pos < 5) {
             if (pos < 4 && stackIndex[pos] >= 0 && mx >= 30 + pos*(cardWidth+30) && mx <= 30 + cardWidth + pos*(cardWidth+30) &&
                 my >= 30 && my <= 30 + cardHeight) return rowDataSheet[pos][returnValue];
-            if (stackIndex[pos] >= 0 && mx >= 1380 && mx <= 1380 + cardWidth && my >= 30 && my <= 30 + cardHeight) return rowDataSheet[pos][returnValue];
+            if (pos == 4 && stackIndex[pos] >= 0 && mx >= 1380 && mx <= 1380 + cardWidth && my >= 30 && my <= 30 + cardHeight) return rowDataSheet[pos][returnValue];
             pos++;
         }
         while (pos < 12) {
@@ -324,7 +324,7 @@ class Klondike {
                     int j;
                     if (i < 4) j = 1;
                     else j = -1;
-                    if (!didCardMove && currentStack != i+1 && currentStack != 5 && i != 4 &&
+                    if (!didCardMove && currentStack != i+1 && i != 4 &&
                         ((stackIndex[i] < 0 && ((i < 4 && currentValue == 1) || (i > 4 && currentValue == 13))) ||
                         ((stackIndex[i] >= 0 && deck.getValue(stacks[i][stackIndex[i]])+j == currentValue &&
                         ((i < 4 && deck.getCardSuit(stacks[i][stackIndex[i]]) == currentSuit) || (i > 4 &&
