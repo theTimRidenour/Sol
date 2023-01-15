@@ -75,7 +75,7 @@ int selectedCardData(int returnValue, int stackIndex[12], int mx, int my, int ca
         if (stackIndex[i] > 6) ccg[i-5] = 340/stackIndex[i];
         else ccg[i-5] = cardGap;
     }
-    
+
     if (faceIndex == NULL) {
         int pos = 0;
         while (pos < 5) {
@@ -105,6 +105,7 @@ int selectedCardData(int returnValue, int stackIndex[12], int mx, int my, int ca
 
 class Klondike {
     public:
+        Klondike() {}
         Deck deck; // create deck of cards
 
         // game variables
@@ -134,7 +135,7 @@ class Klondike {
         int mx = GetMouseX();
         int my = GetMouseY();
 
-        void start(cardGraphics cg, backGroundGraphics bg, Color cardBack) {
+        void start(bool &newGameSystem, cardGraphics cg, backGroundGraphics bg, Color cardBack) {
             mx = GetMouseX();
             my = GetMouseY();
 
@@ -183,8 +184,13 @@ class Klondike {
                 newGame = false;
             }
 
-                // fullscreen
+            // fullscreen
             if (IsKeyPressed(KEY_F)) ToggleFullscreen();
+
+            // new game
+            if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_G)) {
+                newGameSystem = true;
+            }
 /*
             // undo
             if (IsKeyPressed(KEY_BACKSPACE) && history != NULL) {
@@ -266,7 +272,7 @@ class Klondike {
                 }
             }
 */
-            // click on stacks[12]
+            // interact with stack[12]
             if (mx >= 1650 && mx <= 1650 + cardWidth && my >= 30 && my <= 30 + cardHeight && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 if (stackIndex[12] >= 0) {
                     stackIndex[4]++;
@@ -287,7 +293,14 @@ class Klondike {
                 }
             }
 
-            // click face-up card
+            // interact with active cards
+            /*****************************
+             *    cardInfoSheet[a][b]    *
+             *****************************
+             *    a = key value          *
+             * b[0] = stack id           *
+             * b[1] = card at stackIndex *
+             *****************************/
             int cardInfoSheet[12][2];
             cardInfoSheet[0][0] = 1; cardInfoSheet[1][0] = 2; cardInfoSheet[2][0] = 3; cardInfoSheet[3][0] = 4;
             cardInfoSheet[4][0] = 5; cardInfoSheet[5][0] = 6; cardInfoSheet[6][0] = 7; cardInfoSheet[7][0] = 8;
@@ -295,7 +308,7 @@ class Klondike {
 
             for (int i = 0; i < 12; i++) if (stackIndex[i] >= 0) cardInfoSheet[i][1] = stacks[i][stackIndex[i]];
 
-            // top
+            // face up cards on top of stacks
             if (selectedCardFaceUp(stackIndex, mx, my, cardWidth, cardHeight, cardGap) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                 int currentStack = selectedCardData(0, stackIndex, mx, my, cardWidth, cardHeight, cardGap, cardInfoSheet);
                 int currentDeckPos = selectedCardData(1, stackIndex, mx, my, cardWidth, cardHeight, cardGap, cardInfoSheet);
@@ -311,7 +324,7 @@ class Klondike {
                     int j;
                     if (i < 4) j = 1;
                     else j = -1;
-                    if (!didCardMove && currentStack != i+1 && i != 4 &&
+                    if (!didCardMove && currentStack != i+1 && currentStack != 5 && i != 4 &&
                         ((stackIndex[i] < 0 && ((i < 4 && currentValue == 1) || (i > 4 && currentValue == 13))) ||
                         ((stackIndex[i] >= 0 && deck.getValue(stacks[i][stackIndex[i]])+j == currentValue &&
                         ((i < 4 && deck.getCardSuit(stacks[i][stackIndex[i]]) == currentSuit) || (i > 4 &&
@@ -321,6 +334,7 @@ class Klondike {
                             stackIndex[i]++;
                             stacks[i][stackIndex[i]] = currentDeckPos;
                             didCardMove = true;
+                            break;
                         }
                 }
 
@@ -338,6 +352,14 @@ class Klondike {
                 if (i == 0) i = 1;
             }
 
+            /*************************************
+             *         faceIndex[a][b][c]        *
+             *************************************
+             *    a: stacks id; 0 = 5, 1 = 6...  *
+             *    b: card position in stack      *
+             * c[0]: value of card at position   *
+             * c[1]: Y-value of card at position *
+             *************************************/
             int faceIndex[7][19][2];
             for (int i = 0; i < 7; i++) {
                 for (int j = 0; j < 19; j++) faceIndex[i][j][0] = 99;
@@ -349,7 +371,7 @@ class Klondike {
 
             int newStack;
 
-            // middle
+            // face up cards in middle of stacks
             if (selectedCardFaceUp(stackIndex, mx, my, cardWidth, cardHeight, cardGap, faceIndex) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                 int currentStack = selectedCardData(0, stackIndex, mx, my, cardWidth, cardHeight, cardGap, NULL, faceIndex);
                 int currentDeckPos = selectedCardData(1, stackIndex, mx, my, cardWidth, cardHeight, cardGap, NULL, faceIndex);

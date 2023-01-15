@@ -14,6 +14,7 @@ int main(int argc, char const *argv[]) {
     Color cardBack = PURPLE;
     cardGraphics cg;
     backGroundGraphics bg;
+    bool newGame = false;
 
     // initialize graphics
     cg = selectCards(0);
@@ -28,6 +29,10 @@ int main(int argc, char const *argv[]) {
     SetTargetFPS(60);
     SetExitKey(0);
     while(!endGame) {
+        if (newGame) {
+            klondike = Klondike();
+            newGame = false;
+        }
         BeginDrawing();
         ClearBackground(LIGHTGRAY);
         if (IsKeyPressed(KEY_ESCAPE)) {
@@ -37,7 +42,7 @@ int main(int argc, char const *argv[]) {
         if (WindowShouldClose()) endGame = true;
         
         if (option == 0) menu.start(option, endGame, isSelectedCard, isSelectedBG, cardBack, cg, bg);
-        else if (option == 1) klondike.start(cg, bg, cardBack);
+        else if (option == 1) klondike.start(newGame, cg, bg, cardBack);
 
         EndDrawing();
     }
