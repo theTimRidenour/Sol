@@ -6,6 +6,8 @@
 #include "graphics.h"
 #include "history.h"
 
+#include <iostream>
+
 void drawCard(Deck deck, int index, float cardWidth, float cardHeight, Color cardBack, Color cardFront, bool usingGraphics = false, cardGraphics cg = cardGraphics()) {
     Rectangle rec {(float)deck.getX(index), (float)deck.getY(index), cardWidth, cardHeight};
     if (!deck.isFaceUp(index)) {
@@ -108,12 +110,13 @@ class Klondike {
         /******************************** 
          *            STACKS            *
          ********************************
-        * [ 0][ 1][ 2][ 3]    [ 4][12] *
-        *                              *
-        * [ 5][ 6][ 7][ 8][ 9][10][11] *
-        ********************************/
+         * [ 0][ 1][ 2][ 3]    [ 4][12] *
+         *                              *
+         * [ 5][ 6][ 7][ 8][ 9][10][11] *
+         ********************************/
         int stacks[13][24];
         int stackIndex[13]{-1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 23}; //index of top card in stack, -1 = no cards in stack
+        int refIndex[13]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}; // reference for updating positions.
         // int dragCards[12]{};
         
         // mouse
@@ -121,7 +124,6 @@ class Klondike {
         int my = GetMouseY();
 
         void start(cardGraphics cg, backGroundGraphics bg, Color cardBack) {
-            // const float dT { GetFrameTime() };
             mx = GetMouseX();
             my = GetMouseY();
 
@@ -135,49 +137,27 @@ class Klondike {
                     }
                 }
                 for (int cnt = 0; cnt < 52; cnt++) {
-                    // set y values of cards
-                    if (cnt < 7) {
-                        deck.setY(cnt, 396);
-                    } else if (cnt < 13) {
-                        deck.setY(cnt, 417);
-                    } else if (cnt < 18) {
-                        deck.setY(cnt, 438);
-                    } else if (cnt < 22) {
-                        deck.setY(cnt, 459);
-                    } else if (cnt < 25) {
-                        deck.setY(cnt, 480);
-                    } else if (cnt < 27) {
-                        deck.setY(cnt, 501);
-                    } else if (cnt == 27) {
-                        deck.setY(cnt, 522);
-                    } else {
-                        deck.setY(cnt, 30);
-                    }
-
-                    // set x values of cards
+                    // put cards in stacks
                     if (cnt == 0) {
-                        deck.setX(cnt, 30);
                         stacks[5][0] = 0;
                     } else if (cnt == 1 || cnt == 7) {
-                        deck.setX(cnt, 300);
                         stacks[6][0] = 1; stacks[6][1] = 7;
                     } else if (cnt == 2 || cnt == 8 || cnt == 13) {
-                        deck.setX(cnt, 570);
                         stacks[7][0] = 2; stacks[7][1] = 8; stacks[7][2] = 13;
                     } else if (cnt == 3 || cnt == 9 || cnt == 14 || cnt == 18) {
-                        deck.setX(cnt, 840);
-                        stacks[8][0] = 3; stacks[8][1] = 9; stacks[8][2] = 14; stacks[8][3] = 18;
+                        stacks[8][0] = 3; stacks[8][1] = 9; stacks[8][2] = 14;
+                        stacks[8][3] = 18;
                     } else if (cnt == 4 || cnt == 10 || cnt == 15 || cnt == 19 || cnt == 22) {
-                        deck.setX(cnt, 1110);
-                        stacks[9][0] = 4; stacks[9][1] = 10; stacks[9][2] = 15; stacks[9][3] = 19; stacks[9][4] = 22;
+                        stacks[9][0] = 4;  stacks[9][1] = 10; stacks[9][2] = 15;
+                        stacks[9][3] = 19; stacks[9][4] = 22;
                     } else if (cnt == 5 || cnt == 11 || cnt == 16 || cnt == 20 || cnt == 23 || cnt == 25) {
-                        deck.setX(cnt, 1380);
-                        stacks[10][0] = 5; stacks[10][1] = 11; stacks[10][2] = 16; stacks[10][3] = 20; stacks[10][4] = 23; stacks[10][5] = 25;
+                        stacks[10][0] = 5;  stacks[10][1] = 11; stacks[10][2] = 16;
+                        stacks[10][3] = 20; stacks[10][4] = 23; stacks[10][5] = 25;
                     } else if (cnt == 6 || cnt == 12 || cnt == 17 || cnt == 21 || cnt == 24 || cnt == 26 || cnt == 27) {
-                        deck.setX(cnt, 1650);
-                        stacks[11][0] = 6; stacks[11][1] = 12; stacks[11][2] = 17; stacks[11][3] = 21; stacks[11][4] = 24; stacks[11][5] = 26; stacks[11][6] = 27;
+                        stacks[11][0] = 6;  stacks[11][1] = 12; stacks[11][2] = 17;
+                        stacks[11][3] = 21; stacks[11][4] = 24; stacks[11][5] = 26;
+                        stacks[11][6] = 27;
                     } else {
-                        deck.setX(cnt, 1650);
                         stacks[12][drawIndex] = cnt;
                         drawIndex++;
                     }
@@ -194,24 +174,72 @@ class Klondike {
 
                 // fullscreen
             if (IsKeyPressed(KEY_F)) ToggleFullscreen();
-
+/*
             // undo
             if (IsKeyPressed(KEY_BACKSPACE) && history != NULL) {
                 if(history->currentStack != 12) {
-                    stackIndex[history->previousStack]++;
-                    stacks[history->previousStack][stackIndex[history->previousStack]] = stacks[history->currentStack][stackIndex[history->currentStack]];
-                    stacks[history->currentStack][stackIndex[history->currentStack]] = 99;
-                    stackIndex[history->currentStack]--;
-                    if (history->previousStack != 12 && history->previousStack != 4) {
-                        deck.setX(history->cardIndex, 30 + (history->previousStack-5)*(30+cardWidth));
-                        deck.setY(history->cardIndex, 396 + cardGap*stackIndex[history->previousStack]);
-                        deck.setFaceUp(history->cardIndex, history->prevFaceUp);
-                    } else if (history->previousStack != 4) {
-                        deck.setX(history->cardIndex, 0);
-                        deck.setFaceUp(history->cardIndex, false);
+                    //stackIndex[history->previousStack]++;
+                    //stacks[history->previousStack][stackIndex[history->previousStack]] = stacks[history->currentStack][stackIndex[history->currentStack]];
+                    //stacks[history->currentStack][stackIndex[history->currentStack]] = 99;
+                    //stackIndex[history->currentStack]--;
+                    //if (history->previousStack != 12 && history->previousStack != 4) {
+                    //    deck.setX(history->cardIndex, 30 + (history->previousStack-5)*(30+cardWidth));
+                    //    deck.setY(history->cardIndex, 396 + cardGap*stackIndex[history->previousStack]);
+                    //    deck.setFaceUp(stacks[history->previousStack][stackIndex[history->previousStack - 1]], history->prevFaceUp);
+                    //} else if (history->previousStack != 4) {
+                    //    deck.setX(history->cardIndex, 0);
+                    //    deck.setFaceUp(history->cardIndex, false);
+                    //} else {
+                    //    deck.setX(history->cardIndex, 1380);
+                    //    deck.setY(history->cardIndex, 30);
+                    //}
+                    //pop(&history);if(history->currentStack != 12) {
+                    int cardStackIndex = -1;
+                    bool foundIndex = false;
+                    bool firstMove = false;
+                    while (!foundIndex) {
+                        cardStackIndex++;
+                        if (stacks[history->currentStack][cardStackIndex] == 99) {
+                            cardStackIndex--;
+                            foundIndex = true;
+                        }
+                    }
+                    if (stacks[history->currentStack][cardStackIndex] == history->cardIndex) {
+                        stackIndex[history->previousStack]++;
+                        stacks[history->previousStack][stackIndex[history->previousStack]] = stacks[history->currentStack][stackIndex[history->currentStack]];
+                        stacks[history->currentStack][stackIndex[history->currentStack]] = 99;
+                        stackIndex[history->currentStack]--;
+                        if (history->previousStack != 12 && history->previousStack != 4) {
+                            deck.setX(history->cardIndex, 30 + (history->previousStack-5)*(30+cardWidth));
+                            deck.setY(history->cardIndex, 396 + cardGap*stackIndex[history->previousStack]);
+                            deck.setFaceUp(stacks[history->previousStack][stackIndex[history->previousStack - 1]], history->prevFaceUp);
+                        } else if (history->previousStack != 4) {
+                            deck.setX(history->cardIndex, 0);
+                            deck.setFaceUp(history->cardIndex, false);
+                        } else {
+                            deck.setX(history->cardIndex, 1380);
+                            deck.setY(history->cardIndex, 30);
+                        }
                     } else {
-                        deck.setX(history->cardIndex, 1380);
-                        deck.setY(history->cardIndex, 30);
+                        int stopPos = stackIndex[history->previousStack] + 1;
+                        while (stacks[history->previousStack][stopPos] != history->cardIndex) {
+                            stackIndex[history->previousStack]++;
+                            stacks[history->previousStack][stackIndex[history->previousStack]] = stacks[history->currentStack][cardStackIndex];
+                            stacks[history->currentStack][cardStackIndex] == 99;
+                            stackIndex[history->currentStack]--;
+                            if (history->previousStack != 12 && history->previousStack != 4) {
+                                deck.setX(stacks[history->previousStack][stackIndex[history->previousStack]], 30 + (history->previousStack-5)*(30+cardWidth));
+                                deck.setY(stacks[history->previousStack][stackIndex[history->previousStack]], 396 + cardGap*stackIndex[history->previousStack]);
+                                if (stacks[history->previousStack][stackIndex[history->previousStack]] == history->cardIndex) deck.setFaceUp(stacks[history->previousStack][stackIndex[history->previousStack - 1]], history->prevFaceUp);
+                            } else if (history->previousStack != 4) {
+                                deck.setX(history->cardIndex, 0);
+                                deck.setFaceUp(history->cardIndex, false);
+                            } else {
+                                deck.setX(history->cardIndex, 1380);
+                                deck.setY(history->cardIndex, 30);
+                            }
+                            cardStackIndex--;
+                        }
                     }
                     pop(&history);
                 } else {
@@ -226,13 +254,12 @@ class Klondike {
                     pop(&history);
                 }
             }
-
+*/
             // click on stacks[12]
             if (mx >= 1650 && mx <= 1650 + cardWidth && my >= 30 && my <= 30 + cardHeight && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 if (stackIndex[12] >= 0) {
                     stackIndex[4]++;
                     stacks[4][stackIndex[4]] = stacks[12][stackIndex[12]];
-                    deck.setX(stacks[4][stackIndex[4]], 1380);
                     deck.setFaceUp(stacks[4][stackIndex[4]], true);
                     stacks[12][stackIndex[12]] = 99;
                     stackIndex[12]--;
@@ -243,7 +270,6 @@ class Klondike {
                         stackIndex[12]++;
                         stacks[12][stackIndex[12]] = stacks[4][stackIndex[4]];
                         deck.setFaceUp(stacks[4][stackIndex[4]], false);
-                        deck.setX(stacks[4][stackIndex[4]], 1650);
                         stacks[4][stackIndex[4]] = 99;
                         stackIndex[4]--;
                     }
@@ -283,13 +309,6 @@ class Klondike {
                             newStack = i;
                             stackIndex[i]++;
                             stacks[i][stackIndex[i]] = currentDeckPos;
-                            if (i < 4) {
-                                deck.setX(currentDeckPos, 30 + i*(30+cardWidth));
-                                deck.setY(currentDeckPos, 30);
-                            } else {
-                                deck.setX(currentDeckPos, 30 + (i-5)*(30+cardWidth));
-                                deck.setY(currentDeckPos, 396 + stackIndex[i]*cardGap);
-                            }
                             didCardMove = true;
                         }
                 }
@@ -350,8 +369,6 @@ class Klondike {
                             for (int index = currentIndex; index <= currentRowMax; index++) {
                                 stackIndex[i+4]++;
                                 if (currentStack != i ) stacks[i+4][stackIndex[i+4]] = stacks[currentStack+4][index];
-                                deck.setX(stacks[i+4][stackIndex[i+4]], 30 + (i-1)*(30+cardWidth));
-                                deck.setY(stacks[i+4][stackIndex[i+4]], 396 + stackIndex[i+4]*cardGap);
                             }
                             didCardMove = true; // card(s) have been moved
                     }
@@ -368,35 +385,59 @@ class Klondike {
                 }
             }
 
-                DrawTextureRec(bg.image, bg.rec, bg.pos, WHITE);
+            DrawTextureRec(bg.image, bg.rec, bg.pos, WHITE);
 
-                for (int p = 0; p < 5; p++) {
+            for (int p = 0; p < 5; p++) {
 
-                    if (p < 4) {
-                        Rectangle rec{(float)(30 + (p*270)), 30, 240, 336};
-                        DrawRectangleRoundedLines(rec, 0.1, 5, 0.5, BLACK);
-                    } else {
-                        Rectangle rec{1650, 30, 240, 336};
-                        if (stackIndex[12] >= 0) DrawRectangleRounded(rec, 0.1, 5, cardBack);
-                        DrawRectangleRoundedLines(rec, 0.1, 5, 0.5, BLACK);
-                    }
+                if (p < 4) {
+                    Rectangle rec{(float)(30 + (p*270)), 30, 240, 336};
+                    DrawRectangleRoundedLines(rec, 0.1, 5, 0.5, BLACK);
+                } else {
+                    Rectangle rec{1650, 30, 240, 336};
+                    if (stackIndex[12] >= 0) DrawRectangleRounded(rec, 0.1, 5, cardBack);
+                    DrawRectangleRoundedLines(rec, 0.1, 5, 0.5, BLACK);
                 }
+            }
 
-                // check rows
-                for (int i = 5; i < 12; i++) {
-                    if (stackIndex[i] >= 0 && !deck.isFaceUp(stacks[i][stackIndex[i]])) deck.setFaceUp(stacks[i][stackIndex[i]], true);
-                }
-
-                // display cards
-                for (int pos = 0; pos < 23; pos++) {
-                    for (int i = 0; i < 12; i++) {
-                        if (i < 5) {
-                            if (stackIndex[i] >= 0) drawCard(deck, stacks[i][stackIndex[i]], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+            // update positions
+            for (int i = 0; i < 13; i++) {
+                if (stackIndex[i] != refIndex[i]) {
+                    int pos = 0;
+                    refIndex[i] = stackIndex[i];
+                    while (stacks[i][pos] != 99 && pos < 24) {
+                        if (i == 4) {
+                            deck.setX(stacks[i][pos], 1380);
+                            deck.setY(stacks[i][pos], 30);
+                        } else if (i == 12) {
+                            deck.setX(stacks[i][pos], 0);
+                            deck.setY(stacks[i][pos], 0);
+                        } else if (i < 4) {
+                            deck.setX(stacks[i][pos], 30 + i*(cardWidth + 30));
+                            deck.setY(stacks[i][pos], 30);
                         } else {
-                            if (pos <= stackIndex[i]) drawCard(deck, stacks[i][pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                            deck.setX(stacks[i][pos], 30 + (i -5 )*(cardWidth + 30));
+                            deck.setY(stacks[i][pos], 396 + pos*(cardGap));
                         }
+                        pos++;
                     }
                 }
+            }
+
+            // check rows
+            for (int i = 5; i < 12; i++) {
+                if (stackIndex[i] >= 0 && !deck.isFaceUp(stacks[i][stackIndex[i]])) deck.setFaceUp(stacks[i][stackIndex[i]], true);
+            }
+
+            // display cards
+            for (int pos = 0; pos < 23; pos++) {
+                for (int i = 0; i < 12; i++) {
+                    if (i < 5) {
+                        if (stackIndex[i] >= 0) drawCard(deck, stacks[i][stackIndex[i]], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                    } else {
+                        if (pos <= stackIndex[i]) drawCard(deck, stacks[i][pos], cardWidth, cardHeight, cardBack, cardFront, useGraphics, cg);
+                    }
+                }
+            }
         }
 
 };

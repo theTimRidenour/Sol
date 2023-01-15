@@ -22,7 +22,7 @@ class History {
     History *next;
 };
 
-void push(struct History** headRef, int cardIndex, int currentStack, int previousStack, bool prevFaceUp) {
+void push(struct History **headRef, int cardIndex, int currentStack, int previousStack, bool prevFaceUp) {
     struct History *newNode = (struct History*) malloc(sizeof(struct History));
     newNode->cardIndex = cardIndex;
     newNode->currentStack = currentStack;
